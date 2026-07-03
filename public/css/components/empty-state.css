@@ -1,0 +1,31 @@
+/* ============================================
+   Empty States
+   Shown when lists/tables have no data
+   ============================================ */
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-12) var(--space-6);
+}
+
+.empty-state-icon {
+    font-size: var(--text-4xl, 2.25rem);
+    color: var(--gray);
+    margin-bottom: var(--space-md);
+}
+
+.empty-state-title {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--gray-dark);
+    margin-bottom: var(--space-sm);
+}
+
+.empty-state-text {
+    color: var(--gray);
+    margin-bottom: var(--space-6);
+}
+
+.empty-state-actions {
+    margin-top: var(--space-6);
+}

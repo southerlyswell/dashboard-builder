@@ -1,0 +1,85 @@
+/* ============================================
+   Badge Styles
+   Status badges, project badges, and variants
+   ============================================ */
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+.status-active {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.status-inactive {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+}
+
+/* Extended status badge variants */
+.status-pending {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+}
+
+.status-completed {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+/* Project badges */
+.project-badge {
+    display: inline-block;
+    background-color: #6f42c1;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+/* Alternative project badge style */
+.project-badge-alt {
+    display: inline-block;
+    background-color: var(--gray-light);
+    color: #495057;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* WhatsApp badge */
+.whatsapp-badge {
+    background: #25D366;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.whatsapp-badge:before {
+    content: "💬";
+}
+
+.no-whatsapp {
+    color: var(--danger);
+    font-size: 12px;
+}
+
+/* No WhatsApp text */
+.no-whatsapp {
+    color: #dc3545;
+    font-size: 12px;
+}

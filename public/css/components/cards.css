@@ -1,0 +1,134 @@
+/* ============================================
+   Card Styles
+   Stat cards, action cards, and containers
+   ============================================ */
+
+/* Stats grid container */
+.stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+    gap: var(--space-md) !important;
+    margin-bottom: var(--space-md) !important;
+}
+
+/* Individual stat card */
+.stat-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg) var(--space-xl);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.stat-card:hover {
+    transform: translateY(-0.25rem);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card h3 {
+    color: var(--primary-dark);
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.stat-card h3:before {
+    font-size: var(--text-xl);
+}
+
+/* Stat numbers display */
+.stat-numbers {
+    display: flex;
+    justify-content: flex-start;
+    align-items: baseline;
+    margin-bottom: var(--space-sm);
+}
+
+.stat-main {
+    font-size: var(--text-xxl);
+    font-weight: 700;
+    color: var(--primary-teal);
+    line-height: 1.2;
+}
+
+.stat-details {
+    font-size: var(--text-sm);
+    color: var(--gray);
+}
+
+.stat-detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-xs);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--gray-light);
+}
+
+.stat-detail-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* Icon classes for cards */
+.centres-icon:before { content: "🏢"; }
+.staff-icon:before { content: "👥"; }
+.projects-icon:before { content: "📋"; }
+.students-icon:before { content: "🎓"; }
+.attendance-icon:before { content: "✅"; }
+.activity-icon:before { content: "📊"; }
+
+/* Quick actions container */
+.quick-actions {
+    background: white;
+    border-radius: calc(var(--space-md) * 0.75);
+    padding: var(--space-xl) var(--space-xxl);
+    margin-bottom: var(--space-xl);
+    box-shadow: var(--shadow-md);
+}
+
+.quick-actions h2 {
+    color: var(--primary-dark);
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-lg);
+    font-weight: 600;
+}
+
+/* Info box component */
+.info-box {
+    background: #e8f4f8;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid #b6e0fe;
+}
+
+/* Message cards */
+.message-success,
+.message-error {
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-lg);
+    font-size: var(--text-md);
+    border-left: 0.25rem solid transparent;
+}
+
+.message-success {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-left-color: var(--success);
+}
+
+.message-error {
+    background: var(--danger-bg);
+    color: var(--danger-text);
+    border-left-color: var(--danger);
+}
+
+.message-content {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}

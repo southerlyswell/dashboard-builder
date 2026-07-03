@@ -1,0 +1,29 @@
+/* ============================================
+   Color Utilities
+   Color utility classes
+   ============================================ */
+
+/* Background colors */
+.bg-primary { background-color: var(--primary-dark); }
+.bg-teal { background-color: var(--primary-teal); }
+.bg-success { background-color: var(--success); }
+.bg-danger { background-color: var(--danger); }
+.bg-warning { background-color: var(--warning); }
+.bg-gray { background-color: var(--gray); }
+.bg-gray-light { background-color: var(--gray-light); }
+.bg-white { background-color: var(--white); }
+
+/* Text colors */
+.text-primary { color: var(--primary-dark); }
+.text-teal { color: var(--primary-teal); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.text-gray { color: var(--gray); }
+.text-white { color: var(--white); }
+
+/* Status backgrounds */
+.bg-success-light { background-color: var(--success-bg); color: var(--success-text); }
+.bg-danger-light { background-color: var(--danger-bg); color: var(--danger-text); }
+.bg-warning-light { background-color: var(--warning-bg); color: var(--warning-text); }
+.bg-info-light { background-color: var(--info-bg); color: var(--info-text); }

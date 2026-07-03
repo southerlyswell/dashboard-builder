@@ -1,0 +1,90 @@
+/* ============================================
+   Mobile Responsive Styles
+   Mobile-specific adjustments
+   ============================================ */
+
+/* Tablet (max-width: 992px) */
+@media (max-width: 992px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filter-row {
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        min-width: 10rem;
+    }
+    
+    .attendance-matrix th,
+    .attendance-matrix td {
+        padding: var(--space-xs) var(--space-sm);
+        min-width: 3.5rem;
+    }
+    
+    .attendance-matrix tbody td:first-child {
+        min-width: 8rem;
+    }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+    .dashboard-header,
+    .quick-actions,
+    .login-form,
+    .login-header {
+        padding: var(--space-md);
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-row {
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+    
+    .filter-group {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .attendance-matrix-section {
+        overflow-x: auto;
+    }
+    
+    .attendance-matrix {
+        font-size: var(--text-xs);
+    }
+    
+    .attendance-matrix th,
+    .attendance-matrix td {
+        min-width: 3rem;
+    }
+    
+    .form-button-group {
+        flex-direction: column;
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .user-info {
+        text-align: center;
+    }
+}
+
+/* Small mobile (max-width: 480px) */
+@media (max-width: 480px) {
+    .login-container {
+        border-radius: var(--radius-md);
+    }
+    
+    .login-footer {
+        padding: var(--space-md);
+    }
+}

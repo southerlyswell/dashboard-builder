@@ -1,0 +1,181 @@
+/* ============================================
+   Form Styles
+   Inputs, labels, selects, and validation
+   ============================================ */
+
+/* Form group wrapper */
+.form-group {
+    margin-bottom: var(--space-lg);
+}
+
+/* Form labels */
+.form-group label {
+    display: block;
+    margin-bottom: calc(var(--space-xs) / 1.5);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    color: #495057;
+}
+
+/* Form controls (inputs, selects, textareas) */
+.form-control {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--text-base);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-normal);
+    background: white;
+    line-height: 1.5;
+    min-height: 2.75rem;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary-teal);
+    box-shadow: 0 0 0 0.2rem rgba(0, 128, 128, 0.1);
+}
+
+/* Select dropdown arrow */
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right var(--space-sm) center;
+    background-size: 1.2rem;
+    padding-right: 2rem;
+}
+
+/* Filter row */
+.filter-row {
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 12rem;
+}
+
+.filter-info {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-md);
+    color: var(--gray);
+}
+
+.filter-info a {
+    margin-left: var(--space-sm);
+    color: var(--primary-teal);
+    text-decoration: none;
+}
+
+.filter-info a:hover {
+    text-decoration: underline;
+}
+
+/* Advanced filters */
+.advanced-filters {
+    background: var(--gray-light);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #e9ecef;
+}
+
+/* Filter grid for forms */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+/* Form grid for project management */
+.form-grid {
+    display: grid;
+    gap: var(--space-6);
+    max-width: 600px;
+}
+
+/* Checkbox group */
+.checkbox-group label {
+    display: block;
+    padding: 12px;
+    margin: 6px 0;
+    background: var(--gray-light);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.checkbox-group label:hover {
+    background: #e9ecef;
+}
+
+/* Phone input group */
+.phone-input-group {
+    position: relative;
+}
+
+.country-code {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-weight: 500;
+}
+
+.phone-input {
+    padding-left: 45px;
+}
+
+/* Validation states */
+.form-control.is-valid {
+    border-color: var(--success);
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger);
+}
+
+.invalid-feedback {
+    display: none;
+    color: var(--danger);
+    font-size: var(--text-sm);
+    margin-top: calc(var(--space-xs) / 1.5);
+}
+
+.was-validated .form-control:invalid ~ .invalid-feedback {
+    display: block;
+}
+/* Password wrapper for show/hide toggle */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.password-wrapper .form-input {
+    padding-right: 2.5rem;
+}
+.password-toggle {
+    position: absolute;
+    right: var(--space-sm);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-gray-500);
+    padding: var(--space-1);
+    display: flex;
+    align-items: center;
+    font-size: var(--text-sm);
+    transition: color var(--transition-fast);
+}
+.password-toggle:hover { color: var(--color-accent); }
+.password-toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
