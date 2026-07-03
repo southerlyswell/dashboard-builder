@@ -1,0 +1,158 @@
+{
+    "title": "Monthly Revenue & Sales Breakdown",
+    "theme": "dark",
+    "filters": [
+        {
+            "id": "date-range",
+            "type": "date_range",
+            "label": "Date Range",
+            "column": "order_date"
+        },
+        {
+            "id": "category",
+            "type": "dropdown",
+            "label": "Product Category",
+            "query": "SELECT DISTINCT category AS value, category AS label FROM products ORDER BY category"
+        }
+    ],
+    "cards": [
+        {
+            "id": "title-1",
+            "type": "title",
+            "title": "Monthly Revenue & Sales Breakdown",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 0
+        },
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "Total Revenue",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT CONCAT('$', FORMAT(SUM(total_amount), 0)) AS value FROM orders WHERE order_date >= CURDATE() - INTERVAL 30 DAY",
+            "col": 1,
+            "row": 2
+        },
+        {
+            "id": "kpi-2",
+            "type": "kpi",
+            "title": "Avg Order Value",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT CONCAT('$', FORMAT(AVG(total_amount), 2)) AS value FROM orders WHERE order_date >= CURDATE() - INTERVAL 30 DAY",
+            "col": 0,
+            "row": 2
+        },
+        {
+            "id": "kpi-3",
+            "type": "kpi",
+            "title": "Orders (30d)",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) AS value FROM orders WHERE order_date >= CURDATE() - INTERVAL 30 DAY",
+            "col": 2,
+            "row": 2
+        },
+        {
+            "id": "kpi-4",
+            "type": "kpi",
+            "title": "Active Customers",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(DISTINCT customer_id) AS value FROM orders WHERE order_date >= CURDATE() - INTERVAL 30 DAY",
+            "col": 3,
+            "row": 2
+        },
+        {
+            "id": "divider-1",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 5
+        },
+        {
+            "id": "header-1",
+            "type": "header",
+            "title": "Revenue Trends",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 6,
+            "rowspan": 1
+        },
+        {
+            "id": "line-1",
+            "type": "line",
+            "title": "Monthly Revenue",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT DATE_FORMAT(order_date, '%Y-%m') AS label, SUM(total_amount) AS value FROM orders GROUP BY DATE_FORMAT(order_date, '%Y-%m') ORDER BY label",
+            "col": 0,
+            "row": 7
+        },
+        {
+            "id": "subheader-1",
+            "type": "subheader",
+            "title": "Sales Breakdown by Category",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 14,
+            "rowspan": 2
+        },
+        {
+            "id": "donut-1",
+            "type": "donut",
+            "title": "Revenue by Category",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT p.category AS label, SUM(oi.quantity * oi.unit_price) AS value FROM order_items oi JOIN products p ON oi.product_id = p.product_id JOIN orders o ON oi.order_id = o.order_id GROUP BY p.category ORDER BY value DESC",
+            "col": 0,
+            "row": 15
+        },
+        {
+            "id": "bar-1",
+            "type": "bar",
+            "title": "Orders by Category",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT p.category AS label, COUNT(DISTINCT oi.order_id) AS value FROM order_items oi JOIN products p ON oi.product_id = p.product_id JOIN orders o ON oi.order_id = o.order_id GROUP BY p.category ORDER BY value DESC",
+            "col": 2,
+            "row": 15
+        },
+        {
+            "id": "divider-2",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 20
+        },
+        {
+            "id": "header-2",
+            "type": "header",
+            "title": "Recent Orders",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 21,
+            "rowspan": 1
+        },
+        {
+            "id": "table-1",
+            "type": "table",
+            "title": "Latest 20 Orders",
+            "w": 4,
+            "h": 3,
+            "query": "SELECT order_id AS 'Order ID', customer_name AS 'Customer', total_amount AS 'Total', order_date AS 'Date', status AS 'Status' FROM orders ORDER BY order_date DESC LIMIT 20",
+            "col": 0,
+            "row": 23,
+            "rowspan": 3
+        }
+    ]
+}

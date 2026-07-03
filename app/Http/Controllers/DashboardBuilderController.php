@@ -215,7 +215,12 @@ class DashboardBuilderController extends Controller
             return response()->json(['data' => $results]);
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('batchQuery exception', ['error' => $e->getMessage()]);
-            return response()->json(['data' => [], 'error' => $e->getMessage()]);
+            $cards = $request->input('cards');
+            return response()->json([
+                'data' => array_map(function($card) use ($e) {
+                    return ['card_id' => $card['id'], 'error' => 'Database connection failed: ' . $e->getMessage(), 'data' => []];
+                }, $cards)
+            ]);
         }
     }
 
@@ -295,14 +300,13 @@ class DashboardBuilderController extends Controller
                 ]
             );
 
-            $publicUrl = url('/embed/' . $result['git_hash']);
+            $publicUrl = url('/embed/' . $dash->public_id);
 
             return response()->json([
-                'id' => $result['git_hash'],
-                'public_id' => $result['git_hash'],
+                'id' => $dash->id,
+                'public_id' => $dash->public_id,
                 'public_url' => $publicUrl,
                 'name' => $name,
-                'git_hash' => $result['git_hash'],
                 'cards' => $result['cards'],
                 'saved' => true,
             ]);
@@ -359,9 +363,24 @@ class DashboardBuilderController extends Controller
      */
     public function publicEmbed($publicId)
     {
-        // Serve static dashboard JSON via embed viewer
         return view('dashboard-builder.embed-public', [
             'publicId' => $publicId,
+        ]);
+    }
+
+    /**
+     * Public API — fetch dashboard JSON by public_id.
+     */
+    public function publicDashboard($publicId)
+    {
+        $dashboard = Dashboard::where('public_id', $publicId)->first();
+        if (!$dashboard) {
+            return response()->json(['error' => 'Dashboard not found'], 404);
+        }
+        return response()->json([
+            'title' => $dashboard->name,
+            'cards' => $dashboard->layout['cards'] ?? [],
+            'theme' => $dashboard->theme ?? 'dark',
         ]);
     }
 
@@ -465,6 +484,32 @@ class DashboardBuilderController extends Controller
         return redirect()->route('dashbuilder.client-detail', $client);
     }
     
+    /**
+     * Fetch client database schema (tables + columns).
+     */
+    public function clientSchema(Client $client)
+    {
+        if (!$client->db_database) {
+            return response()->json(['error' => 'No database configured for this client. Edit the client to add database connection details.']);
+        }
+        try {
+            $this->setupClientConnection($client);
+            $tables = DB::connection('temp_client')->select('SHOW TABLES');
+            $schema = [];
+            foreach ($tables as $table) {
+                $tableName = array_values((array)$table)[0];
+                $columns = DB::connection('temp_client')->select("SHOW COLUMNS FROM `$tableName`");
+                $schema[] = [
+                    'name' => $tableName,
+                    'columns' => array_map(function($c) { return $c->Field . ' (' . $c->Type . ')'; }, $columns),
+                ];
+            }
+            return response()->json(['tables' => $schema]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to read schema: ' . $e->getMessage()]);
+        }
+    }
+
     /**
      * Show client detail with dashboards.
      */

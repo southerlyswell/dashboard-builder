@@ -18,7 +18,7 @@
 </div>
 <script>
 var hash = '{{ $publicId }}';
-var url = '/dashboards/' + hash + '.json';
+var url = '/api/dashboard/' + hash;
 var charts = {};
 
 function renderCard(c) {

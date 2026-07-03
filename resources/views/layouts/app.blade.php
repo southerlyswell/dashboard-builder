@@ -13,7 +13,7 @@
 
     @stack('styles')
 </head>
-<body class="page-@yield('page_slug', 'dashboard')">
+<body class="page-@yield('page_slug', 'dashboard')" style="background: #0f172a; color: #e2e8f0;">
     <div class="app-layout">
         <!-- Sidebar Navigation -->
         <aside class="sidebar" id="sidebar">

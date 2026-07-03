@@ -33,6 +33,9 @@
             </div>
             <button type="submit" class="btn-login" style="width:100%">Login</button>
         </form>
+        <div style="text-align:center;margin-top:16px;">
+            <a href="{{ route('register') }}" style="color:#FB923C;text-decoration:none;font-size:13px;">Don't have an account? Register</a>
+        </div>
     </div>
 </div>
 @endsection

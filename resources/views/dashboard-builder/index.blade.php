@@ -48,7 +48,7 @@
             </div>
 
             <div class="quick-actions">
-                <button class="quick-btn" @click="showSchema = true">Schema</button>
+                <button class="quick-btn" @click="toggleSchema()">Schema</button>
                 <button class="quick-btn" @click="sendQuick('Build a management overview dashboard with KPIs, trends, and breakdowns')">Overview</button>
                 <button class="quick-btn" @click="sendQuick('Add filters for date range and branch')">Filters</button>
                 <button class="quick-btn" @click="sendQuick('Show me the JSON for this dashboard')">JSON</button>
@@ -72,17 +72,55 @@
                 <button class="btn btn-outline" @click="showRevisions()" x-show="dashboard && !showSchema && revisions.length > 1">Revisions</button>
                 <button class="btn btn-outline" @click="toggleJSON()" x-show="dashboard && !showSchema" x-text="showJSONPanel ? 'Close JSON' : 'JSON'"></button>
                 <a class="btn btn-outline" href="/dashboard-builder/projects" style="text-decoration:none;">Projects</a>
-                <button class="btn btn-primary" @click="saveDashboard()" x-show="dashboard && !showSchema">Save</button>
+                <button class="btn-save" @click="saveDashboard()" :disabled="saveStatus === 'saving'" x-show="dashboard && !showSchema">
+                    <span x-show="saveStatus !== 'saving' && saveStatus !== 'saved' && saveStatus !== 'error'">Save</span>
+                    <span x-show="saveStatus === 'saving'">Saving...</span>
+                    <span x-show="saveStatus === 'saved'" style="color:#4ade80;">&#10003; Saved</span>
+                    <span x-show="saveStatus === 'error'" style="color:#f87171;">&#10007; Failed</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar" x-show="dashboard && dashboard.cards && dashboard.cards.length > 0 && !showSchema" x-cloak>
+            <div class="filter-item">
+                <label>Date Range</label>
+                <select x-model="activeFilters.date_range" @change="setFilter('date_range', activeFilters.date_range)">
+                    <option value="">All time</option>
+                    <option value="last_7_days">Last 7 days</option>
+                    <option value="last_30_days">Last 30 days</option>
+                    <option value="last_90_days">Last 90 days</option>
+                </select>
+            </div>
+            <div class="filter-status" x-show="dataLoading">
+                <span class="filter-pulse">Filtering...</span>
+            </div>
+            <div class="filter-active-count" x-show="Object.keys(activeFilters).filter(function(k) { return activeFilters[k]; }).length > 0">
+                <span x-text="Object.keys(activeFilters).filter(function(k) { return activeFilters[k]; }).length + ' filter(s) active'"></span>
+                <button @click="clearFilters()" class="filter-clear">Clear all</button>
             </div>
         </div>
 
         <div class="preview-area">
             <!-- Schema view -->
             <div x-show="showSchema" class="schema-view">
-                <p class="schema-legend">PK = Primary Key | FK = Foreign key | Lines = FK relationships</p>
-                <div class="schema-img-wrap">
-                    <img src="/schema-diagram.svg" alt="Database Schema" class="schema-img">
+                <div x-show="schemaLoading" style="color:#FB923C;padding:20px;">Loading schema...</div>
+                <div x-show="!schemaLoading && schemaData && schemaData.error" style="color:#f87171;padding:20px;">
+                    <strong>Unable to load schema:</strong> <span x-text="typeof schemaData.error === 'string' ? schemaData.error : 'Unknown error'"></span>
                 </div>
+                <div x-show="!schemaLoading && schemaData && schemaData.tables" style="padding:16px;overflow-y:auto;max-height:calc(100vh - 120px);">
+                    <template x-for="table in schemaData.tables" :key="table.name">
+                        <div style="margin-bottom:12px;background:#1e293b;border:1px solid #334155;border-radius:8px;overflow:hidden;">
+                            <div style="padding:8px 14px;background:#334155;color:#FB923C;font-weight:600;font-size:13px;" x-text="table.name"></div>
+                            <div style="padding:6px 14px;">
+                                <template x-for="col in table.columns" :key="col">
+                                    <div style="color:#94a3b8;font-size:12px;padding:2px 0;" x-text="col"></div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div x-show="!schemaLoading && !schemaData" style="color:#64748b;padding:20px;">Click "Schema" to view the client database structure.</div>
             </div>
 
             <!-- Empty state -->
@@ -189,7 +227,7 @@
 
 </div>
 
-<script src="/js/dashboard-builder.js?v=12"></script>
+<script src="/js/dashboard-builder.js?v=13"></script>
 <script>window.ACFS_CONFIG = { clientId: '{{ $activeClient?->id }}' };</script>
 </body>
 </html>

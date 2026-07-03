@@ -21,6 +21,10 @@ function dashboardBuilder() {
         revisions: [],
         revisionIndex: -1,
         activeFilters: {},
+        saveStatus: '',
+        dataLoading: false,
+        schemaData: null,
+        schemaLoading: false,
         _chartInstances: {},
         _chartObservers: {},
 
@@ -370,6 +374,7 @@ function dashboardBuilder() {
             var cardsWithQueries = this.dashboard.cards.filter(function(c) { return c.query; });
             if (!cardsWithQueries.length) return;
             var self = this;
+            this.dataLoading = true;
 
             fetch('/dashboard-builder/batch-query', {
                 method: 'POST',
@@ -378,25 +383,35 @@ function dashboardBuilder() {
             })
             .then(function(r) { return r.json(); })
             .then(function(resp) {
-                var data = resp.data || {};
-                cardsWithQueries.forEach(function(c) {
-                    var result = data[c.id];
-                    if (!result || result.error) return;
-                    c._data = result;
+                self.dataLoading = false;
+                var data = resp.data || [];
+                if (!Array.isArray(data)) { data = Object.values(data); }
+                data.forEach(function(item) {
+                    var c = cardsWithQueries.find(function(cc) { return cc.id === item.card_id; }) ||
+                            self.dashboard.cards.find(function(cc) { return cc.id === item.card_id; });
+                    if (!c) return;
+                    if (item.error) { c.dataError = item.error; return; }
+                    c.dataError = null;
+                    c._data = item;
                     if (c.type === 'kpi' || c.type === 'stat') {
                         var el = document.querySelector('[data-card-id="' + c.id + '"] .stat-value');
-                        if (el && result.value !== undefined) {
-                            var v = result.value;
+                        if (el && item.value !== undefined) {
+                            var v = item.value;
                             el.textContent = v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toLocaleString();
                             el.className = 'stat-value ' + (v > 1000 ? 'green' : v > 500 ? 'amber' : 'red');
                         }
                     } else if (['line','bar','donut','funnel','gauge','heatmap','pie','combo','scatter','area','radar'].indexOf(c.type) >= 0) {
-                        self.renderChart(c, result);
+                        self.renderChart(c, item);
                     }
                 });
-                console.log('Data loaded for ' + cardsWithQueries.length + ' cards');
             })
-            .catch(function(e) { console.error('Query fetch failed:', e.message); });
+            .catch(function(e) {
+                console.error('Query fetch failed:', e.message);
+                self.dataLoading = false;
+                cardsWithQueries.forEach(function(c) {
+                    c.dataError = 'Failed to load data. Client database may not be configured.';
+                });
+            });
         },
 
         // ===== Auto-placement =====
@@ -443,14 +458,36 @@ function dashboardBuilder() {
             var idx = cards.findIndex(function(c) { return c.id === this.cardEditModal.id; }.bind(this));
             if (idx < 0) return;
             var card = cards[idx];
-            var newX = card.col, newY = card.row;
+            var newX = card.col || 0, newY = card.row || 0;
             if (dir === 'up') newY--;
             else if (dir === 'down') newY++;
             else if (dir === 'left') newX--;
             else if (dir === 'right') newX++;
             if (newX < 0 || newY < 0 || newX + card.w > 4) return;
+
+            // Left/right: swap with occupying card
+            if (dir === 'left' || dir === 'right') {
+                var occupying = cards.find(function(c) {
+                    return c.id !== card.id && c.col === newX && c.row === newY;
+                });
+                if (occupying) {
+                    occupying.col = card.col;
+                    occupying.row = card.row;
+                }
+            }
+            // Down: find next empty row
+            if (dir === 'down') {
+                while (cards.find(function(c) { return c.id !== card.id && c.col === newX && c.row === newY; })) newY++;
+            }
+            // Up: find next empty row
+            if (dir === 'up') {
+                while (newY >= 0 && cards.find(function(c) { return c.id !== card.id && c.col === newX && c.row === newY; })) newY--;
+                if (newY < 0) newY = 0;
+            }
+
             card.col = newX;
             card.row = newY;
+            this.cardEditModal = null;
             this.addRevision(this.dashboard);
             var self = this;
             this.$nextTick(function() { self.renderGrid(); });
@@ -525,18 +562,45 @@ function dashboardBuilder() {
             if (this.dashboard) this.fetchCardData();
         },
 
+        clearFilters() {
+            this.activeFilters = {};
+            if (this.dashboard) this.fetchCardData();
+        },
+
         // ===== UI Toggles =====
         toggleChat() { this.chatVisible = !this.chatVisible; },
 
         toggleJSON() {
             if (this.showJSONPanel) { this.showJSONPanel = false; return; }
-            this.jsonEditorText = JSON.stringify({
-                title: this.dashboard.title,
-                cards: this.dashboard.cards.map(function(c) {
-                    return { id: c.id, type: c.type, title: c.title, w: c.w, query: c.query || null };
-                })
-            }, null, 2);
+            if (!this.dashboard) {
+                this.jsonEditorText = '{\n  "title": "New Dashboard",\n  "cards": []\n}';
+            } else {
+                this.jsonEditorText = JSON.stringify(this.dashboard, null, 2);
+            }
             this.showJSONPanel = true;
+        },
+
+        toggleSchema() {
+            this.showSchema = !this.showSchema;
+            if (this.showSchema && !this.schemaData) {
+                this.loadSchema();
+            }
+        },
+
+        loadSchema() {
+            if (!this.activeClient) return;
+            var self = this;
+            this.schemaLoading = true;
+            fetch('/dashboard-builder/schema/' + this.activeClient)
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    self.schemaData = data;
+                    self.schemaLoading = false;
+                })
+                .catch(function(e) {
+                    self.schemaData = { error: 'Failed to load schema' };
+                    self.schemaLoading = false;
+                });
         },
 
         applyJSONEdit() {
@@ -563,6 +627,7 @@ function dashboardBuilder() {
         saveDashboard() {
             if (!this.dashboard) return;
             var self = this;
+            this.saveStatus = 'saving';
             fetch('/dashboard-builder/dashboards', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
@@ -570,13 +635,21 @@ function dashboardBuilder() {
             })
             .then(function(r) { return r.json(); })
             .then(function(resp) {
-                if (resp.public_url) {
-                    alert('Dashboard saved! Embed URL: ' + resp.public_url);
-                } else {
-                    alert('Dashboard saved!');
+                if (resp.error) { self.saveStatus = 'error'; setTimeout(function() { self.saveStatus = ''; }, 3000); return; }
+                self.saveStatus = 'saved';
+                self.dashboardId = resp.id || self.dashboardId;
+                self.publicUrl = resp.public_url || '';
+                if (resp.id) {
+                    var url = new URL(window.location.href);
+                    url.searchParams.set('project', resp.id);
+                    window.history.replaceState({}, '', url.toString());
                 }
+                setTimeout(function() { self.saveStatus = ''; }, 3000);
             })
-            .catch(function(e) { alert('Save failed: ' + e.message); });
+            .catch(function(e) {
+                self.saveStatus = 'error';
+                setTimeout(function() { self.saveStatus = ''; }, 3000);
+            });
         },
 
         // ===== Client Switch =====

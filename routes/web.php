@@ -12,12 +12,14 @@ Route::get('/dashboard-builder/ai/health', [DashboardBuilderController::class, '
 Route::post('/dashboard-builder/ai/chat', [DashboardBuilderController::class, 'aiChat'])->name('dashbuilder.ai.chat');
 Route::post('/dashboard-builder/batch-query', [DashboardBuilderController::class, 'batchQuery'])->name('dashbuilder.query.batch');
 Route::post('/dashboard-builder/query', [DashboardBuilderController::class, 'query'])->name('dashbuilder.query');
+Route::get('/api/dashboard/{publicId}', [DashboardBuilderController::class, 'publicDashboard'])->name('dashbuilder.public-dashboard');
 
 // Authenticated routes
 Route::middleware('auth')->prefix('dashboard-builder')->name('dashbuilder.')->group(function () {
     Route::get('/', [DashboardBuilderController::class, 'index'])->name('index');
     Route::get('/connect', [DashboardBuilderController::class, 'connect'])->name('connect');
     Route::post('/connect', [DashboardBuilderController::class, 'storeConnection']);
+    Route::get('/schema/{client}', [DashboardBuilderController::class, 'clientSchema'])->name('schema');
     Route::get('/clients', [DashboardBuilderController::class, 'clients'])->name('clients');
     Route::get('/clients/{client}', [DashboardBuilderController::class, 'clientDetail'])->name('client-detail');
     Route::post('/ai/generate-dashboard', [DashboardBuilderController::class, 'aiGenerateDashboard'])->name('ai.generate');
