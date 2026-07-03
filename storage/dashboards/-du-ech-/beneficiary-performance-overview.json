@@ -1,0 +1,160 @@
+{
+    "title": "Beneficiary Performance Overview",
+    "theme": "dark",
+    "filters": [
+        {
+            "id": "date-range",
+            "type": "date_range",
+            "label": "Date Range",
+            "column": "created_at"
+        },
+        {
+            "id": "branch",
+            "type": "dropdown",
+            "label": "Branch",
+            "query": "SELECT branch_id AS value, branch_name AS label FROM branches"
+        },
+        {
+            "id": "status",
+            "type": "toggle",
+            "label": "Active Only",
+            "column": "active"
+        }
+    ],
+    "cards": [
+        {
+            "id": "title-1",
+            "type": "title",
+            "title": "Beneficiary Performance Overview",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 0
+        },
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "Active Beneficiaries",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) AS value FROM beneficiaries WHERE active = 1",
+            "col": 0,
+            "row": 2
+        },
+        {
+            "id": "kpi-2",
+            "type": "kpi",
+            "title": "Enrollments This Month",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) AS value FROM beneficiaries WHERE MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())",
+            "col": 1,
+            "row": 2
+        },
+        {
+            "id": "kpi-3",
+            "type": "kpi",
+            "title": "Avg Attendance Rate",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT ROUND(AVG(attended) * 100, 1) AS value FROM attendance WHERE attendance_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
+            "col": 2,
+            "row": 2
+        },
+        {
+            "id": "kpi-4",
+            "type": "kpi",
+            "title": "Unique Projects",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(DISTINCT project_id) AS value FROM beneficiaries WHERE active = 1",
+            "col": 3,
+            "row": 2
+        },
+        {
+            "id": "divider-1",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 5
+        },
+        {
+            "id": "header-1",
+            "type": "header",
+            "title": "Performance Overview",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 6
+        },
+        {
+            "id": "line-1",
+            "type": "line",
+            "title": "Daily Attendance Trend (Last 30 Days)",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT attendance_date AS x, COUNT(*) AS y FROM attendance WHERE attendance_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY attendance_date ORDER BY attendance_date",
+            "col": 0,
+            "row": 8
+        },
+        {
+            "id": "subheader-1",
+            "type": "subheader",
+            "title": "Breakdown by Category",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 14
+        },
+        {
+            "id": "donut-1",
+            "type": "donut",
+            "title": "Beneficiaries by Gender",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT gender AS label, COUNT(*) AS value FROM beneficiaries WHERE active = 1 GROUP BY gender",
+            "col": 0,
+            "row": 15
+        },
+        {
+            "id": "bar-1",
+            "type": "bar",
+            "title": "Beneficiaries by Branch",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT b.branch_name AS label, COUNT(*) AS value FROM beneficiaries be JOIN branches b ON be.branch_id = b.branch_id WHERE be.active = 1 GROUP BY b.branch_name ORDER BY value DESC",
+            "col": 2,
+            "row": 15
+        },
+        {
+            "id": "divider-2",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 20
+        },
+        {
+            "id": "header-2",
+            "type": "header",
+            "title": "Details",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 21
+        },
+        {
+            "id": "table-1",
+            "type": "table",
+            "title": "Recent Beneficiaries",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT beneficiary_id, CONCAT(first_name, ' ', last_name) AS name, branch_name, project_name, enrollment_date, active FROM beneficiaries be JOIN branches br ON be.branch_id = br.branch_id JOIN projects p ON be.project_id = p.project_id ORDER BY created_at DESC LIMIT 10",
+            "col": 0,
+            "row": 23
+        }
+    ]
+}
