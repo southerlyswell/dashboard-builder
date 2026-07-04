@@ -65,6 +65,16 @@ function clientsPage() {
             }).then(function(r) { return r.json(); })
               .then(function() { self.loadClients(); })
               .catch(function(e) { console.error('Delete failed:', e); });
+        },
+
+        sendToClient(client) {
+            if (client && client.contact_email) {
+                var subject = 'Your Dashboard is Ready';
+                var body = 'Hi ' + (client.contact_name || 'there') + ',\n\nYour dashboard has been prepared. You can view it here:\n' + window.location.origin + '/dashboard-builder/clients/' + client.id + '\n\nBest regards,\nACFS Dashboard Team';
+                window.open('mailto:' + client.contact_email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body), '_blank');
+            } else {
+                alert('No email address on file for this client.');
+            }
         }
     };
 }

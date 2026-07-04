@@ -1,9 +1,7 @@
-@extends('layouts.app')
+<?php $__env->startSection('page_title', 'Dashboard Builder'); ?>
+<?php $__env->startSection('page_slug', 'dashboard-builder'); ?>
 
-@section('page_title', 'Dashboard Builder')
-@section('page_slug', 'dashboard-builder')
-
-@section('styles')
+<?php $__env->startSection('styles'); ?>
 <link rel="stylesheet" href="/css/dashboard-builder.css">
 <style>
     body { overflow: auto; }
@@ -119,9 +117,9 @@
     .modal-overlay { display: none; }
     .modal-overlay[style*="display: flex"], .modal-overlay[style*="display:flex"] { display: flex !important; }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="home-page" x-data="clientsPage()" x-init="init()" x-cloak>
     <div class="home-header">
         <h1>Clients</h1>
@@ -270,4 +268,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 <script src="/js/clients.js?v=3"></script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\dashboard-builder\resources\views/dashboard-builder/projects.blade.php ENDPATH**/ ?>

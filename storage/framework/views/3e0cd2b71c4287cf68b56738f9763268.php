@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard Builder — {{ $activeClient?->name ?? 'ACFS' }}</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title>Dashboard Builder — <?php echo e($activeClient?->name ?? 'ACFS'); ?></title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
@@ -22,11 +22,12 @@
             <p>AI-powered, zero code</p>
             <select class="client-select" x-model="activeClient" @change="switchClient()">
                 <option value="">Select a client...</option>
-                @foreach($clients as $client)
-                    <option value="{{ $client->id }}" {{ ($activeClient && $activeClient->id === $client->id) ? 'selected' : '' }}>
-                        {{ $client->name }}
+                <?php $__currentLoopData = $clients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($client->id); ?>" <?php echo e(($activeClient && $activeClient->id === $client->id) ? 'selected' : ''); ?>>
+                        <?php echo e($client->name); ?>
+
                     </option>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
             <div class="ai-status-bar">
                 <span class="ai-dot" :class="aiChecking ? 'grey' : (aiOnline ? 'green' : 'red')"></span>
@@ -210,6 +211,7 @@
 </div>
 
 <script src="/js/dashboard-builder.js?v=14"></script>
-<script>window.ACFS_CONFIG = { clientId: '{{ $activeClient?->id }}' };</script>
+<script>window.ACFS_CONFIG = { clientId: '<?php echo e($activeClient?->id); ?>' };</script>
 </body>
 </html>
+<?php /**PATH C:\laragon\www\dashboard-builder\resources\views/dashboard-builder/index.blade.php ENDPATH**/ ?>
