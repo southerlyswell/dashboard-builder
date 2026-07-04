@@ -7,35 +7,28 @@
 
     <title>@yield('page_title', 'Dashboard') - {{ config('app.name') }}</title>
 
-    <!-- Design System -->
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ filemtime(public_path('css/style.css')) }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/dashboard-builder.css">
 
     @stack('styles')
 </head>
-<body class="page-@yield('page_slug', 'dashboard')" style="background: #0f172a; color: #e2e8f0;">
+<body>
     <div class="app-layout">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar" id="sidebar">
-            <!-- Logo area -->
+        <aside class="nav-sidebar-w" id="sidebar">
             <div class="logo-area">
-                <img src="{{ asset('icons/acfs-round-01.svg') }}" alt="Logo" width="40" height="40">
+                <span style="font-size:24px;">&#9660;</span>
                 <div>
                     <h2 class="logo-title">Dashboard Builder</h2>
                     <p class="logo-subtitle">AI-Powered Dashboards</p>
                 </div>
             </div>
-
             <nav class="nav-sidebar">
                 <a href="{{ route('dashbuilder.projects') }}" class="nav-item {{ request()->routeIs('dashbuilder.*') ? 'active' : '' }}">
-                    <span class="nav-icon">🎯</span>
-                    Dashboard Builder
+                    <span class="nav-icon">&#9679;</span> Dashboard Builder
                 </a>
                 <div class="nav-divider"></div>
                 <a href="{{ route('logout') }}" class="nav-item"
                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <span class="nav-icon">🚪</span>
-                    Logout
+                    <span class="nav-icon">&#9660;</span> Logout
                 </a>
                 <form id="logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
                     @csrf
@@ -43,51 +36,42 @@
             </nav>
         </aside>
 
-        <!-- Mobile menu toggle -->
-        <button id="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('open');">
-            ☰
-        </button>
-
-        <!-- Sidebar overlay for mobile -->
-        <div id="sidebar-overlay" onclick="document.getElementById('sidebar').classList.remove('open'); this.classList.remove('open');"></div>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <div class="content-wrapper">
-                <!-- Page Header -->
-                <div class="page-header">
-                    <h1>@yield('page_title', 'Dashboard')</h1>
-                    @auth
-                    <div class="user-info">
-                        <span class="current-user-label">Admin:</span>
-                        <span class="user-name">{{ Auth::user()->name }}</span>
-                    </div>
-                    @endauth
+        <div class="main-area">
+            <div class="page-header">
+                <h1>@yield('page_title', 'Dashboard')</h1>
+                @auth
+                <div class="user-info">
+                    <span class="dot"></span> {{ Auth::user()->name }}
                 </div>
-
-                @yield('content')
-
-                <!-- Footer -->
-                <footer class="app-footer">
-                    <p class="text-sm text-muted">Dashboard Builder v1.0</p>
-                </footer>
+                @endauth
             </div>
-        </main>
+
+            <div class="content-area">
+                @yield('content')
+            </div>
+
+            <footer class="app-footer">
+                Dashboard Builder v1.0
+            </footer>
+        </div>
     </div>
 
     <script>
-        function updateMenuToggle() {
-            const menuToggle = document.getElementById('menu-toggle');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (menuToggle) {
-                menuToggle.style.display = window.innerWidth <= 1024 ? 'block' : 'none';
-            }
+        (function(){
+            var btn = document.getElementById('menu-toggle');
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebar-overlay');
+            if (btn) btn.style.display = window.innerWidth <= 768 ? 'block' : 'none';
+            window.addEventListener('resize', function(){
+                if (btn) btn.style.display = window.innerWidth <= 768 ? 'block' : 'none';
+            });
             if (overlay) {
-                overlay.style.display = 'none';
+                overlay.addEventListener('click', function(){
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('open');
+                });
             }
-        }
-        updateMenuToggle();
-        window.addEventListener('resize', updateMenuToggle);
+        })();
     </script>
 
     @stack('scripts')

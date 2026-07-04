@@ -7,8 +7,7 @@
 
     <title><?php echo $__env->yieldContent('page_title', 'Login'); ?> - <?php echo e(config('app.name')); ?></title>
 
-    <link rel="stylesheet" href="<?php echo e(asset('css/style.css')); ?>">
-    <link rel="stylesheet" href="<?php echo e(asset('css/layouts/login.css')); ?>">
+    <link rel="stylesheet" href="/css/dashboard-builder.css">
 
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>

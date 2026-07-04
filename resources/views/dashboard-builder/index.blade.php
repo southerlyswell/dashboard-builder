@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
     <link rel="stylesheet" href="/css/dashboard-builder.css">
 </head>
-<body>
+<body class="builder-body">
 <div class="app" x-data="dashboardBuilder()">
 
     <!-- SIDEBAR: AI Chat -->
@@ -209,7 +209,7 @@
 
 </div>
 
-<script src="/js/dashboard-builder.js?v=14"></script>
+<script src="/js/dashboard-builder.js?v=15"></script>
 <script>window.ACFS_CONFIG = { clientId: '{{ $activeClient?->id }}' };</script>
 </body>
 </html>

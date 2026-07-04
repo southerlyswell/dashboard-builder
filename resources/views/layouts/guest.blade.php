@@ -7,8 +7,7 @@
 
     <title>@yield('page_title', 'Login') - {{ config('app.name') }}</title>
 
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/layouts/login.css') }}">
+    <link rel="stylesheet" href="/css/dashboard-builder.css">
 
     @stack('styles')
 </head>

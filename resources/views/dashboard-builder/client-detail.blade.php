@@ -1,99 +1,49 @@
 @extends('layouts.app')
 
-@section('page_title', $client->name . ' — Dashboards')
-@section('page_slug', 'dashboard-builder')
-
-@section('styles')
-<link rel="stylesheet" href="/css/dashboard-builder.css">
-<style>
-    body { overflow: auto; }
-    .client-detail-page { max-width: 1200px; margin: 0 auto; padding: 24px; }
-    .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .detail-header h1 { font-size: 24px; color: #f1f5f9; }
-    .detail-header .actions { display: flex; gap: 10px; }
-    .btn-primary { background: #FB923C; color: #0f172a; border: none; padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; }
-    .btn-primary:hover { background: #f97316; }
-    .btn-outline { background: transparent; color: #94a3b8; border: 1px solid #334155; padding: 8px 16px; border-radius: 8px; font-size: 13px; text-decoration: none; }
-    .btn-outline:hover { border-color: #FB923C; color: #FB923C; }
-
-    .client-info { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 24px; }
-    .client-info-row { display: flex; gap: 24px; flex-wrap: wrap; }
-    .client-info-item { font-size: 13px; color: #94a3b8; }
-    .client-info-item .label { color: #475569; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; display: block; margin-bottom: 2px; }
-    .client-info-item .value { color: #e2e8f0; font-weight: 500; }
-
-    .dashboards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-    .dashboard-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 16px; transition: border-color 0.15s; }
-    .dashboard-card:hover { border-color: #FB923C; }
-    .dashboard-name { font-size: 16px; font-weight: 600; color: #f1f5f9; margin-bottom: 4px; }
-    .dashboard-meta { font-size: 11px; color: #64748b; display: flex; gap: 12px; margin-bottom: 12px; }
-    .dashboard-actions { display: flex; gap: 8px; }
-    .dashboard-actions a, .dashboard-actions button { font-size: 12px; padding: 6px 14px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; cursor: pointer; text-decoration: none; }
-    .dashboard-actions a:hover, .dashboard-actions button:hover { border-color: #FB923C; color: #FB923C; }
-
-    .empty-state { text-align: center; padding: 60px 20px; }
-    .empty-state h3 { font-size: 18px; color: #94a3b8; margin-bottom: 8px; }
-    .empty-state a { color: #FB923C; text-decoration: none; }
-</style>
-@endsection
+@section('page_title', $client->name)
 
 @section('content')
-<div class="client-detail-page">
-    <div class="detail-header">
-        <h1>{{ $client->name }}</h1>
-        <div class="actions">
-            <a href="{{ route('dashbuilder.projects') }}" class="btn-outline">← All Clients</a>
-            <a href="/dashboard-builder?client={{ $client->id }}" class="btn-primary">+ New Dashboard</a>
-        </div>
+<div style="max-width:1200px;margin:0 auto;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <a href="{{ route('dashbuilder.projects') }}" class="btn-ghost">&#8592; All Clients</a>
+        <a href="/dashboard-builder?client={{ $client->id }}" class="btn-orange">&#10011; New Dashboard</a>
     </div>
 
     <div class="client-info">
-        <div class="client-info-row">
-            @if($client->contact_name)
-            <div class="client-info-item">
-                <span class="label">Contact</span>
-                <span class="value">{{ $client->contact_name }}</span>
+        <div class="client-info-top">
+            <div>
+                <div class="client-info-name">{{ $client->name }}</div>
+                <span class="client-info-cat">{{ $client->industry ?? 'General' }}</span>
             </div>
-            @endif
-            @if($client->contact_email)
-            <div class="client-info-item">
-                <span class="label">Email</span>
-                <span class="value">{{ $client->contact_email }}</span>
-            </div>
-            @endif
-            @if($client->contact_phone)
-            <div class="client-info-item">
-                <span class="label">Phone</span>
-                <span class="value">{{ $client->contact_phone }}</span>
-            </div>
-            @endif
-            @if($client->city)
-            <div class="client-info-item">
-                <span class="label">Location</span>
-                <span class="value">{{ $client->city }}{{ $client->province ? ', ' . $client->province : '' }}</span>
-            </div>
-            @endif
-            @if($client->industry)
-            <div class="client-info-item">
-                <span class="label">Industry</span>
-                <span class="value">{{ $client->industry }}</span>
-            </div>
-            @endif
+            <span class="client-info-status">{{ $client->is_active ? 'Active' : 'Inactive' }}</span>
         </div>
+        <div class="client-info-grid">
+            @if($client->contact_name)<div class="info-item"><div class="lbl">Contact</div><div class="val">{{ $client->contact_name }}</div></div>@endif
+            @if($client->contact_email)<div class="info-item"><div class="lbl">Email</div><div class="val">{{ $client->contact_email }}</div></div>@endif
+            @if($client->contact_phone)<div class="info-item"><div class="lbl">Phone</div><div class="val">{{ $client->contact_phone }}</div></div>@endif
+            @if($client->city)<div class="info-item"><div class="lbl">Location</div><div class="val">{{ $client->city }}{{ $client->province ? ', ' . $client->province : '' }}</div></div>@endif
+        </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:16px;color:#f1f5f9;font-weight:600;">Dashboards</h2>
+        <span style="font-size:12px;color:#64748b;">{{ $dashboards->count() }} dashboard{{ $dashboards->count() !== 1 ? 's' : '' }}</span>
     </div>
 
     @if($dashboards->count() > 0)
     <div class="dashboards-grid">
         @foreach($dashboards as $dashboard)
-        <div class="dashboard-card">
-            <div class="dashboard-name">{{ $dashboard->name }}</div>
-            <div class="dashboard-meta">
-                <span>📋 {{ $dashboard->card_count }} cards</span>
-                <span>🕐 {{ $dashboard->updated_at?->format('Y-m-d') }}</span>
+        <div class="db-card">
+            <div class="db-card-title">{{ $dashboard->name }}</div>
+            <div class="db-card-meta">
+                <span>&#9679; {{ $dashboard->card_count }} cards</span>
+                <span>&#9679; {{ $dashboard->updated_at?->format('Y-m-d') }}</span>
+                @if($dashboard->is_published)<span style="color:#4ade80;">&#9679; Embedded</span>@endif
             </div>
-            <div class="dashboard-actions">
-                <a href="/dashboard-builder?project={{ $dashboard->id }}">Load & Edit</a>
-                <a href="/embed/{{ $dashboard->public_id }}" target="_blank">View</a>
+            <div class="db-card-actions">
+                <a href="/dashboard-builder?project={{ $dashboard->id }}">&#9998; Load &amp; Edit</a>
+                <a href="/embed/{{ $dashboard->public_id }}" target="_blank">&#9679; View</a>
             </div>
         </div>
         @endforeach
@@ -101,7 +51,7 @@
     @else
     <div class="empty-state">
         <h3>No dashboards yet</h3>
-        <p><a href="/dashboard-builder?client={{ $client->id }}">Create one with AI →</a></p>
+        <a href="/dashboard-builder?client={{ $client->id }}" style="color:#FB923C;text-decoration:none;">Create one with AI &#8594;</a>
     </div>
     @endif
 </div>
