@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class DashboardBuilderController extends Controller
 {
     /**
-     * Main dashboard builder page — AI chat + layout editor + live preview.
+     * Main dashboard builder page - AI chat + layout editor + live preview.
      */
     public function index(Request $request)
     {
@@ -22,12 +22,12 @@ class DashboardBuilderController extends Controller
             $clients = Client::orderBy('name')->get();
             return view('dashboard-builder.index', [
                 'clients' => $clients,
-                'activeClient' => $request->query('client') 
-                    ? Client::find($request->query('client')) 
+                'activeClient' => $request->query('client')
+                    ? Client::find($request->query('client'))
                     : $clients->first(),
             ]);
         }
-        
+
         // If a client ID is specified, open builder for that client
         if ($request->query('client')) {
             $clients = Client::orderBy('name')->get();
@@ -36,7 +36,7 @@ class DashboardBuilderController extends Controller
                 'activeClient' => Client::find($request->query('client')),
             ]);
         }
-        
+
         // Default: redirect to projects home
         return redirect()->route('dashbuilder.projects');
     }
@@ -132,7 +132,7 @@ class DashboardBuilderController extends Controller
             });
             return response()->json($clients);
         }
-        
+
         return view('dashboard-builder.projects', [
             'clients' => Client::orderBy('name')->get(),
         ]);
@@ -150,7 +150,7 @@ class DashboardBuilderController extends Controller
     }
 
     /**
-     * AI chat endpoint — consultant sends message, AI responds.
+     * AI chat endpoint - consultant sends message, AI responds.
      */
     public function aiHealth()
     {
@@ -159,12 +159,12 @@ class DashboardBuilderController extends Controller
     }
 
     /**
-     * Chat with the AI — used for the consultant chat panel.
+     * Chat with the AI - used for the consultant chat panel.
      */
     public function aiChat(Request $request)
     {
         $request->validate(['message' => 'required|string']);
-        
+
         $ai = new \App\Services\DashboardAIService();
         $response = $ai->chat(
             $request->input('message'),
@@ -187,7 +187,7 @@ class DashboardBuilderController extends Controller
 
         $client = $request->input('client_id') ? Client::find($request->input('client_id')) : null;
         $ai = new \App\Services\DashboardAIService();
-        
+
         $dashboard = $ai->generateDashboard(
             $request->input('prompt'),
             $client,
@@ -197,7 +197,7 @@ class DashboardBuilderController extends Controller
     }
 
     /**
-     * Batch query execution — runs all card queries and returns results.
+     * Batch query execution - runs all card queries and returns results.
      */
     public function batchQuery(Request $request)
     {
@@ -236,10 +236,10 @@ class DashboardBuilderController extends Controller
             ]);
 
             $client = Client::findOrFail($request->input('client_id'));
-            
+
             // Use cache for repeated queries
             $cacheKey = 'db_query:' . md5($client->id . $request->input('sql'));
-            
+
             $result = Cache::remember($cacheKey, 300, function () use ($client, $request) {
                 $this->setupClientConnection($client);
                 return DB::connection('temp_client')->select($request->input('sql'));
@@ -253,7 +253,7 @@ class DashboardBuilderController extends Controller
     }
 
     /**
-     * Dashboard JSON endpoint — returns the layout spec.
+     * Dashboard JSON endpoint - returns the layout spec.
      */
     public function dashboardJson($dashboard)
     {
@@ -262,7 +262,7 @@ class DashboardBuilderController extends Controller
     }
 
     /**
-     * Store a dashboard — git-backed with automatic versioning.
+     * Store a dashboard - git-backed with automatic versioning.
      * Accepts either {dashboard: {...}} or {name: ..., layout: {...}} format.
      */
     public function storeDashboard(Request $request)
@@ -282,7 +282,7 @@ class DashboardBuilderController extends Controller
         }
 
         $git = new DashboardGitService();
-        
+
         try {
             $result = $git->save(
                 $this->clientSlug($client->name),
@@ -330,7 +330,7 @@ class DashboardBuilderController extends Controller
         $name = strtolower(preg_replace('/[^a-z0-9]+/', '-', trim($validated['dashboard_name'])));
 
         $history = $git->history($this->clientSlug($client->name), $name);
-        
+
         return response()->json(['history' => $history]);
     }
 
@@ -348,18 +348,18 @@ class DashboardBuilderController extends Controller
         $client = Client::findOrFail($validated['client_id']);
         $git = new DashboardGitService();
         $name = strtolower(preg_replace('/[^a-z0-9]+/', '-', trim($validated['dashboard_name'])));
-        
+
         $data = $git->loadRevision($this->clientSlug($client->name), $name, $validated['hash']);
-        
+
         if (!$data) {
             return response()->json(['error' => 'Revision not found'], 404);
         }
-        
+
         return response()->json(['dashboard' => $data, 'hash' => $validated['hash']]);
     }
 
     /**
-     * Public embed — standalone page for client sharing.
+     * Public embed - standalone page for client sharing.
      */
     public function publicEmbed($publicId)
     {
@@ -369,7 +369,7 @@ class DashboardBuilderController extends Controller
     }
 
     /**
-     * Public API — fetch dashboard JSON by public_id.
+     * Public API - fetch dashboard JSON by public_id.
      */
     public function publicDashboard($publicId)
     {
@@ -385,7 +385,7 @@ class DashboardBuilderController extends Controller
     }
 
     /**
-     * Projects repository — list all saved dashboards.
+     * Projects repository - list all saved dashboards.
      */
     public function projects(Request $request)
     {
@@ -393,22 +393,22 @@ class DashboardBuilderController extends Controller
         if ($request->wantsJson()) {
             return $this->projectsJson($request);
         }
-        
+
         $clients = Client::orderBy('name')->get();
-        
+
         return view('dashboard-builder.projects', [
             'clients' => $clients,
         ]);
     }
-    
+
     private function projectsJson(Request $request)
     {
         $query = Dashboard::with('client')->latest();
-        
+
         if ($request->filled('client_id')) {
             $query->where('client_id', $request->input('client_id'));
         }
-        
+
         $dashboards = $query->get()->map(function ($d) {
             $layout = is_array($d->layout) ? $d->layout : json_decode($d->layout, true);
             return [
@@ -422,10 +422,10 @@ class DashboardBuilderController extends Controller
                 'updated_at' => $d->updated_at?->format('Y-m-d H:i'),
             ];
         });
-        
+
         return response()->json($dashboards);
     }
-    
+
     /**
      * Load a saved dashboard into the builder.
      */
@@ -433,7 +433,7 @@ class DashboardBuilderController extends Controller
     {
         $dashboard = Dashboard::with('client')->findOrFail($id);
         $layout = is_array($dashboard->layout) ? $dashboard->layout : json_decode($dashboard->layout, true);
-        
+
         return response()->json([
             'id' => $dashboard->id,
             'name' => $dashboard->name,
@@ -445,7 +445,7 @@ class DashboardBuilderController extends Controller
             'updated_at' => $dashboard->updated_at?->format('Y-m-d H:i'),
         ]);
     }
-    
+
     /**
      * Delete a saved dashboard.
      */
@@ -453,7 +453,7 @@ class DashboardBuilderController extends Controller
     {
         $dashboard = Dashboard::findOrFail($id);
         $dashboard->delete();
-        
+
         return response()->json(['deleted' => true]);
     }
 
@@ -479,20 +479,59 @@ class DashboardBuilderController extends Controller
             'db_username' => 'nullable|string|max:255',
             'db_password' => 'nullable|string|max:255',
         ]);
-        
+
         if (!empty($validated['db_password'])) {
             $validated['db_password'] = encrypt($validated['db_password']);
         }
 
         $client = Client::create($validated);
-        
+
         if ($request->wantsJson()) {
             return response()->json(['id' => $client->id, 'name' => $client->name, 'created' => true]);
         }
-        
+
         return redirect()->route('dashbuilder.client-detail', $client);
     }
-    
+
+    /**
+     * Update an existing client.
+     */
+    public function updateClient(Request $request, Client $client)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'contact_name' => 'nullable|string|max:255',
+            'contact_email' => 'nullable|email|max:255',
+            'contact_phone' => 'nullable|string|max:50',
+            'address_line1' => 'nullable|string|max:255',
+            'address_line2' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'province' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
+            'industry' => 'nullable|string|max:100',
+            'db_host' => 'nullable|string|max:255',
+            'db_port' => 'nullable|integer|min:1|max:65535',
+            'db_database' => 'nullable|string|max:255',
+            'db_username' => 'nullable|string|max:255',
+            'db_password' => 'nullable|string|max:255',
+            'is_active' => 'boolean',
+        ]);
+
+        if (!empty($validated['db_password'])) {
+            $validated['db_password'] = encrypt($validated['db_password']);
+        } else {
+            unset($validated['db_password']); // don't overwrite with empty
+        }
+
+        $client->update($validated);
+
+        if ($request->wantsJson()) {
+            return response()->json(['id' => $client->id, 'name' => $client->name, 'updated' => true]);
+        }
+
+        return redirect()->route('dashbuilder.client-detail', $client);
+    }
+
     /**
      * Fetch client database schema (tables + columns).
      */
@@ -531,13 +570,13 @@ class DashboardBuilderController extends Controller
             $d->card_count = isset($layout['cards']) ? count($layout['cards']) : 0;
             return $d;
         });
-        
+
         return view('dashboard-builder.client-detail', [
             'client' => $client,
             'dashboards' => $dashboards,
         ]);
     }
-    
+
     /**
      * Delete a client and all its dashboards.
      */
@@ -545,7 +584,7 @@ class DashboardBuilderController extends Controller
     {
         $client->dashboards()->delete();
         $client->delete();
-        
+
         return response()->json(['deleted' => true]);
     }
 

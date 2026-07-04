@@ -34,6 +34,7 @@ Route::middleware('auth')->prefix('dashboard-builder')->name('dashbuilder.')->gr
 
     // Client management
     Route::post('/clients', [DashboardBuilderController::class, 'storeClient'])->name('clients.store');
+    Route::put('/clients/{client}', [DashboardBuilderController::class, 'updateClient'])->name('clients.update');
     Route::delete('/clients/{client}', [DashboardBuilderController::class, 'deleteClient'])->name('clients.delete');
 });
 
