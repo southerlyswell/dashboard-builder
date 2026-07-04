@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('page_title', 'Login') - {{ config('app.name') }}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
     <link rel="stylesheet" href="/css/dashboard-builder.css">
 

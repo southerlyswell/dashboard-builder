@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
     <title><?php echo $__env->yieldContent('page_title', 'Dashboard'); ?> - <?php echo e(config('app.name')); ?></title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 
     <link rel="stylesheet" href="/css/dashboard-builder.css">
 

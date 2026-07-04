@@ -480,6 +480,10 @@ class DashboardBuilderController extends Controller
             'db_password' => 'nullable|string|max:255',
         ]);
         
+        if (!empty($validated['db_password'])) {
+            $validated['db_password'] = encrypt($validated['db_password']);
+        }
+
         $client = Client::create($validated);
         
         if ($request->wantsJson()) {
@@ -501,14 +505,16 @@ class DashboardBuilderController extends Controller
             $this->setupClientConnection($client);
             $tables = DB::connection('temp_client')->select('SHOW TABLES');
             $schema = [];
+            $snapshot = [];
             foreach ($tables as $table) {
                 $tableName = array_values((array)$table)[0];
                 $columns = DB::connection('temp_client')->select("SHOW COLUMNS FROM `$tableName`");
-                $schema[] = [
-                    'name' => $tableName,
-                    'columns' => array_map(function($c) { return $c->Field . ' (' . $c->Type . ')'; }, $columns),
-                ];
+                $colList = array_map(function($c) { return $c->Field . ' (' . $c->Type . ')'; }, $columns);
+                $schema[] = ['name' => $tableName, 'columns' => $colList];
+                $snapshot[$tableName] = ['columns' => $colList, 'row_count' => (int) DB::connection('temp_client')->selectOne("SELECT COUNT(*) as cnt FROM `$tableName`")->cnt];
             }
+            // Save snapshot for AI use
+            $client->update(['schema_snapshot' => $snapshot]);
             return response()->json(['tables' => $schema]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to read schema: ' . $e->getMessage()]);
@@ -562,7 +568,7 @@ class DashboardBuilderController extends Controller
                 'port' => $client->db_port,
                 'database' => $client->db_database,
                 'username' => $client->db_username,
-                'password' => decrypt($client->db_password),
+                'password' => $client->db_password ? decrypt($client->db_password) : '',
             ]
         ]);
     }
