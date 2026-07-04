@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard Builder — {{ $activeClient?->name ?? 'ACFS' }}</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title>Dashboard Builder — <?php echo e($activeClient?->name ?? 'ACFS'); ?></title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
@@ -22,11 +22,12 @@
             <p>AI-powered, zero code</p>
             <select class="client-select" x-model="activeClient" @change="switchClient()">
                 <option value="">Select a client...</option>
-                @foreach($clients as $client)
-                    <option value="{{ $client->id }}" {{ ($activeClient && $activeClient->id === $client->id) ? 'selected' : '' }}>
-                        {{ $client->name }}
+                <?php $__currentLoopData = $clients; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $client): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($client->id); ?>" <?php echo e(($activeClient && $activeClient->id === $client->id) ? 'selected' : ''); ?>>
+                        <?php echo e($client->name); ?>
+
                     </option>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
             <div class="ai-status-bar">
                 <span class="ai-dot" :class="aiChecking ? 'grey' : (aiOnline ? 'green' : 'red')"></span>
@@ -50,6 +51,7 @@
             <div class="quick-actions">
                 <button class="quick-btn" @click="toggleSchema()">Schema</button>
                 <button class="quick-btn" @click="sendQuick('Build a management overview dashboard with KPIs, trends, and breakdowns')">Overview</button>
+                <button class="quick-btn" @click="sendQuick('Add filters for date range and branch')">Filters</button>
                 <button class="quick-btn" @click="sendQuick('Show me the JSON for this dashboard')">JSON</button>
             </div>
 
@@ -111,6 +113,35 @@
             </div>
 
             <!-- Filter cluster -->
+            <template x-if="dashboard && dashboard.filters">
+                <div class="filter-row">
+                    <template x-for="f in (dashboard.filters || [])" :key="f.id">
+                        <div class="filter-kpi" :class="activeFilters[f.id] ? 'filter-kpi-active' : ''">
+                            <div class="filter-dot-row">
+                                <span class="filter-dot" :style="'background:' + (f.type === 'date_range' ? '#38bdf8' : f.type === 'dropdown' ? '#4ade80' : '#fb923c')"></span>
+                            </div>
+                            <div class="filter-label" x-text="f.label"></div>
+                            <div class="filter-value" x-text="activeFilters[f.id] || (f.type === 'date_range' ? 'Last 30 days' : f.type === 'dropdown' ? 'All' : '—')"></div>
+                            <div class="filter-controls">
+                                <div x-show="f.type === 'date_range'" class="filter-pills">
+                                    <button @click="setFilter(f.id, 'last_7_days')" :class="activeFilters[f.id] === 'last_7_days' ? 'pill active' : 'pill'">7d</button>
+                                    <button @click="setFilter(f.id, 'last_30_days')" :class="activeFilters[f.id] === 'last_30_days' || !activeFilters[f.id] ? 'pill active' : 'pill'">30d</button>
+                                    <button @click="setFilter(f.id, 'last_90_days')" :class="activeFilters[f.id] === 'last_90_days' ? 'pill active' : 'pill'">90d</button>
+                                    <button @click="setFilter(f.id, 'all_time')" :class="activeFilters[f.id] === 'all_time' ? 'pill active' : 'pill'">All</button>
+                                </div>
+                                <select x-show="f.type === 'dropdown'" @change="setFilter(f.id, $event.target.value)" class="filter-select">
+                                    <option value="">All</option>
+                                </select>
+                                <label x-show="f.type === 'toggle'" class="filter-toggle">
+                                    <input type="checkbox" @change="setFilter(f.id, $event.target.checked)">
+                                    <span>Active</span>
+                                </label>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
             <!-- Progress overlay -->
             <div x-show="loading" class="progress-overlay">
                 <div class="loading loading-lg"></div>
@@ -180,6 +211,7 @@
 </div>
 
 <script src="/js/dashboard-builder.js?v=15"></script>
-<script>window.ACFS_CONFIG = { clientId: '{{ $activeClient?->id }}' };</script>
+<script>window.ACFS_CONFIG = { clientId: '<?php echo e($activeClient?->id); ?>' };</script>
 </body>
 </html>
+<?php /**PATH C:\laragon\www\dashboard-builder\resources\views/dashboard-builder/index.blade.php ENDPATH**/ ?>

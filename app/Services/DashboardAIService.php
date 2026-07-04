@@ -212,7 +212,6 @@ Rules:
 - Main trend chart full width (w=4, h=6) after section header
 - Breakdown charts 2 per row (w=2 each) below subheader
 - Tables at the bottom (w=4, h=6)
-- Include sensible filters (date range, branch name, category)
 - ONLY return JSON, nothing else
 PROMPT;
 
@@ -280,11 +279,7 @@ PROMPT;
         
         // Layout framework — the AI must follow this structure to avoid "shotgun" dashboards
         $prompt .= "DASHBOARD STRUCTURE (follow exactly):\n";
-        $prompt .= "  FIRST: Include a 'filters' array. Analyze the schema below and pick filters that make sense:\n";
-        $prompt .= "    - date_range: for any table with date columns (attendance_date, created_at, etc). Add 'Date Range' filter.\n";
-        $prompt .= "    - dropdown: for any FK column (branch_id, project_id, category, gender, status). Add dropdown filter with label + SQL to get options.\n";
-        $prompt .= "    - toggle: for boolean columns (active, status). Add toggle filter.\n";
-        $prompt .= "  THEN the card rows:\n";
+        $prompt .= "  Card rows:\n";
         $prompt .= "  Row 1: Title card (type=title, w=4, h=2)\n";
         $prompt .= "  Row 2: 3-4 KPI cards (type=kpi, w=1 each, h=3) — pick the 3-4 MOST IMPORTANT metrics\n";
         $prompt .= "  Row 3: Divider (type=divider, w=4, h=1)\n";
@@ -302,7 +297,6 @@ PROMPT;
         $prompt .= "- Pick metrics that tell a story together: KPI row → trend → breakdown.\n";
         $prompt .= "- Chart type matching: trend over time = line, category comparison = horizontal bar, part-to-whole = donut, progress = gauge.\n";
         $prompt .= "- 6-column grid. colspan must total 6 per row. Use colspan (1-6) for width, rowspan for height.\n";
-        $prompt .= "- Include a 'filters' array BEFORE 'cards'. Analyze the schema and add 1-3 relevant filters (date_range for date columns, dropdown for FK/lookup columns like branch_id, project_id, gender, status).\n";
         $prompt .= "- Real MySQL queries only. Use CURDATE(), DATE_SUB(), real table and column names from the schema below.\n";
         $prompt .= "\nDASHBOARD INTEGRITY (CRITICAL — DO NOT BREAK THE LAYOUT):\n";
         $prompt .= "- When modifying an existing dashboard: ADD new cards to the BOTTOM, never reposition existing cards unless the user explicitly asks you to move something.\n";
@@ -313,7 +307,7 @@ PROMPT;
         $prompt .= "- After building a dashboard, offer ONE specific, useful suggestion (e.g. 'Would you like me to add a trend line to the attendance chart?' or 'Want me to add a regional breakdown?'). Wait for the user to say yes before doing anything.\n";
         $prompt .= "- Keep explanations short. The dashboard speaks for itself.\n";
         $prompt .= "- Output ONLY the JSON dashboard in a ```json code block. No conversational text before or after the JSON.\n\n";
-        $prompt .= "JSON FORMAT:\n```json\n{\"dashboard\":{\"title\":\"Dashboard Title\",\"theme\":\"dark\",\"filters\":[{\"id\":\"date-range\",\"type\":\"date_range\",\"label\":\"Date Range\",\"column\":\"attendance_date\"},{\"id\":\"branch\",\"type\":\"dropdown\",\"label\":\"Branch\",\"query\":\"SELECT branch_id as value, branch_name as label FROM branches\"}],\"cards\":[{\"id\":\"title-1\",\"type\":\"title\",\"title\":\"Dashboard Title\",\"w\":4,\"h\":2},{\"id\":\"kpi-1\",\"type\":\"kpi\",\"title\":\"Metric Name\",\"w\":1,\"h\":3,\"query\":\"SELECT ...\"},{\"id\":\"divider-1\",\"type\":\"divider\",\"title\":\"\",\"w\":4,\"h\":1},{\"id\":\"header-1\",\"type\":\"header\",\"title\":\"Section Title\",\"w\":4,\"h\":2},{\"id\":\"line-1\",\"type\":\"line\",\"title\":\"Chart Title\",\"w\":4,\"h\":6,\"query\":\"SELECT ...\"}]}}\n```\n\n";
+        $prompt .= "JSON FORMAT:\n```json\n{\"dashboard\":{\"title\":\"Dashboard Title\",\"theme\":\"dark\",\"cards\":[{\"id\":\"title-1\",\"type\":\"title\",\"title\":\"Dashboard Title\",\"w\":4,\"h\":2},{\"id\":\"kpi-1\",\"type\":\"kpi\",\"title\":\"Metric Name\",\"w\":1,\"h\":3,\"query\":\"SELECT ...\"},{\"id\":\"divider-1\",\"type\":\"divider\",\"title\":\"\",\"w\":4,\"h\":1},{\"id\":\"header-1\",\"type\":\"header\",\"title\":\"Section Title\",\"w\":4,\"h\":2},{\"id\":\"line-1\",\"type\":\"line\",\"title\":\"Chart Title\",\"w\":4,\"h\":6,\"query\":\"SELECT ...\"}]}}\n```\n\n";
 
         if ($client && $client->schema_snapshot) {
             $schema = $client->schema_snapshot;
