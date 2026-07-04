@@ -1,0 +1,168 @@
+{
+    "cards": [
+        {
+            "h": 2,
+            "w": 4,
+            "id": "title-1",
+            "col": 0,
+            "row": 0,
+            "type": "title",
+            "title": "Beneficiary Performance Overview"
+        },
+        {
+            "h": 3,
+            "w": 1,
+            "id": "kpi-1",
+            "col": 0,
+            "row": 2,
+            "type": "kpi",
+            "query": "SELECT COUNT(*) AS value FROM beneficiaries WHERE active = 1",
+            "title": "Active Beneficiaries",
+            "dataError": "Query error: SQLSTATE[HY000] [1524] Plugin 'mysql_native_password' is not loaded (Connection: temp_client, Host: localhost, Port: 3306, Database: , SQL: SET SESSION max_execution_time = 5000)"
+        },
+        {
+            "h": 3,
+            "w": 1,
+            "id": "kpi-2",
+            "col": 1,
+            "row": 2,
+            "type": "kpi",
+            "query": "SELECT COUNT(*) AS value FROM beneficiaries WHERE MONTH(created_at) = MONTH(CURDATE()) AND YEAR(created_at) = YEAR(CURDATE())",
+            "title": "Enrollments This Month",
+            "dataError": "Query error: SQLSTATE[HY000] [1524] Plugin 'mysql_native_password' is not loaded (Connection: temp_client, Host: localhost, Port: 3306, Database: , SQL: SET SESSION max_execution_time = 5000)"
+        },
+        {
+            "h": 3,
+            "w": 1,
+            "id": "kpi-3",
+            "col": 2,
+            "row": 2,
+            "type": "kpi",
+            "query": "SELECT ROUND(AVG(attended) * 100, 1) AS value FROM attendance WHERE attendance_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
+            "title": "Avg Attendance Rate",
+            "dataError": "Query error: SQLSTATE[HY000] [1524] Plugin 'mysql_native_password' is not loaded (Connection: temp_client, Host: localhost, Port: 3306, Database: , SQL: SET SESSION max_execution_time = 5000)"
+        },
+        {
+            "h": 3,
+            "w": 1,
+            "id": "kpi-4",
+            "col": 3,
+            "row": 2,
+            "type": "kpi",
+            "query": "SELECT COUNT(DISTINCT project_id) AS value FROM beneficiaries WHERE active = 1",
+            "title": "Unique Projects",
+            "dataError": "Query error: SQLSTATE[HY000] [1524] Plugin 'mysql_native_password' is not loaded (Connection: temp_client, Host: localhost, Port: 3306, Database: , SQL: SET SESSION max_execution_time = 5000)"
+        },
+        {
+            "h": 1,
+            "w": 4,
+            "id": "divider-1",
+            "col": 0,
+            "row": 5,
+            "type": "divider",
+            "title": null
+        },
+        {
+            "h": 2,
+            "w": 4,
+            "id": "header-1",
+            "col": 0,
+            "row": 6,
+            "type": "header",
+            "title": "Performance Overview"
+        },
+        {
+            "h": 6,
+            "w": 4,
+            "id": "line-1",
+            "col": 0,
+            "row": 8,
+            "type": "line",
+            "query": "SELECT attendance_date AS x, COUNT(*) AS y FROM attendance WHERE attendance_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY attendance_date ORDER BY attendance_date",
+            "title": "Daily Attendance Trend (Last 30 Days)",
+            "dataError": "Query error: SQLSTATE[HY000] [1524] Plugin 'mysql_native_password' is not loaded (Connection: temp_client, Host: localhost, Port: 3306, Database: , SQL: SET SESSION max_execution_time = 5000)"
+        },
+        {
+            "h": 1,
+            "w": 4,
+            "id": "subheader-1",
+            "col": 0,
+            "row": 14,
+            "type": "subheader",
+            "title": "Breakdown by Category"
+        },
+        {
+            "h": 5,
+            "w": 2,
+            "id": "donut-1",
+            "col": 0,
+            "row": 15,
+            "type": "donut",
+            "query": "SELECT gender AS label, COUNT(*) AS value FROM beneficiaries WHERE active = 1 GROUP BY gender",
+            "title": "Beneficiaries by Gender",
+            "dataError": "Query error: SQLSTATE[HY000] [1524] Plugin 'mysql_native_password' is not loaded (Connection: temp_client, Host: localhost, Port: 3306, Database: , SQL: SET SESSION max_execution_time = 5000)"
+        },
+        {
+            "h": 5,
+            "w": 2,
+            "id": "bar-1",
+            "col": 2,
+            "row": 15,
+            "type": "bar",
+            "query": "SELECT b.branch_name AS label, COUNT(*) AS value FROM beneficiaries be JOIN branches b ON be.branch_id = b.branch_id WHERE be.active = 1 GROUP BY b.branch_name ORDER BY value DESC",
+            "title": "Beneficiaries by Branch",
+            "dataError": "Query error: SQLSTATE[HY000] [1524] Plugin 'mysql_native_password' is not loaded (Connection: temp_client, Host: localhost, Port: 3306, Database: , SQL: SET SESSION max_execution_time = 5000)"
+        },
+        {
+            "h": 1,
+            "w": 4,
+            "id": "divider-2",
+            "col": 0,
+            "row": 20,
+            "type": "divider",
+            "title": null
+        },
+        {
+            "h": 2,
+            "w": 4,
+            "id": "header-2",
+            "col": 0,
+            "row": 21,
+            "type": "header",
+            "title": "Details"
+        },
+        {
+            "h": 6,
+            "w": 4,
+            "id": "table-1",
+            "col": 0,
+            "row": 23,
+            "type": "table",
+            "query": "SELECT beneficiary_id, CONCAT(first_name, ' ', last_name) AS name, branch_name, project_name, enrollment_date, active FROM beneficiaries be JOIN branches br ON be.branch_id = br.branch_id JOIN projects p ON be.project_id = p.project_id ORDER BY created_at DESC LIMIT 10",
+            "title": "Recent Beneficiaries",
+            "dataError": "Query error: SQLSTATE[HY000] [1524] Plugin 'mysql_native_password' is not loaded (Connection: temp_client, Host: localhost, Port: 3306, Database: , SQL: SET SESSION max_execution_time = 5000)"
+        }
+    ],
+    "theme": "dark",
+    "title": "Beneficiary Performance Overview",
+    "filters": [
+        {
+            "id": "date-range",
+            "type": "date_range",
+            "label": "Date Range",
+            "column": "created_at"
+        },
+        {
+            "id": "branch",
+            "type": "dropdown",
+            "label": "Branch",
+            "query": "SELECT branch_id AS value, branch_name AS label FROM branches"
+        },
+        {
+            "id": "status",
+            "type": "toggle",
+            "label": "Active Only",
+            "column": "active"
+        }
+    ]
+}
