@@ -5,7 +5,8 @@ function clientsPage() {
         showAddClient: false,
         form: {
             name: '', contact_name: '', contact_email: '', contact_phone: '',
-            address_line1: '', city: '', province: '', postal_code: '', industry: ''
+            address_line1: '', city: '', province: '', postal_code: '', industry: '',
+            db_host: '127.0.0.1', db_port: 3306, db_database: '', db_username: '', db_password: ''
         },
 
         init() {
@@ -41,7 +42,7 @@ function clientsPage() {
               .then(function(data) {
                   if (data.id) {
                       self.showAddClient = false;
-                      self.form = { name: '', contact_name: '', contact_email: '', contact_phone: '', address_line1: '', city: '', province: '', postal_code: '', industry: '' };
+                      self.form = { name: '', contact_name: '', contact_email: '', contact_phone: '', address_line1: '', city: '', province: '', postal_code: '', industry: '', db_host: '127.0.0.1', db_port: 3306, db_database: '', db_username: '', db_password: '' };
                       self.loadClients();
                   } else if (data.errors) {
                       alert('Validation error: ' + Object.values(data.errors).flat().join(', '));

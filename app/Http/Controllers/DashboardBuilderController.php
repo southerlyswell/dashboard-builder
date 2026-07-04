@@ -473,6 +473,11 @@ class DashboardBuilderController extends Controller
             'province' => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:20',
             'industry' => 'nullable|string|max:100',
+            'db_host' => 'nullable|string|max:255',
+            'db_port' => 'nullable|integer|min:1|max:65535',
+            'db_database' => 'nullable|string|max:255',
+            'db_username' => 'nullable|string|max:255',
+            'db_password' => 'nullable|string|max:255',
         ]);
         
         $client = Client::create($validated);

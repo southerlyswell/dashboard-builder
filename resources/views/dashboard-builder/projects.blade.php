@@ -87,6 +87,16 @@
                     <div class="form-group"><label>City</label><input type="text" x-model="form.city" placeholder="Johannesburg"></div>
                     <div class="form-group"><label>Province</label><input type="text" x-model="form.province" placeholder="Gauteng"></div>
                     <div class="form-group"><label>Postal Code</label><input type="text" x-model="form.postal_code" placeholder="2000"></div>
+
+                    <!-- Database Connection -->
+                    <div class="form-group full" style="margin-top:8px;padding-top:14px;border-top:1px solid #334155;">
+                        <label style="color:#FB923C;font-size:12px;">Database Connection (optional — for live querying)</label>
+                    </div>
+                    <div class="form-group"><label>DB Host</label><input type="text" x-model="form.db_host" placeholder="127.0.0.1"></div>
+                    <div class="form-group"><label>DB Port</label><input type="number" x-model="form.db_port" placeholder="3306"></div>
+                    <div class="form-group full"><label>Database Name</label><input type="text" x-model="form.db_database" placeholder="my_database"></div>
+                    <div class="form-group"><label>DB Username</label><input type="text" x-model="form.db_username" placeholder="root"></div>
+                    <div class="form-group"><label>DB Password</label><input type="password" x-model="form.db_password" placeholder="(password)"></div>
                 </div>
                 <div class="form-actions">
                     <button type="button" class="btn-ghost" @click="showAddClient = false">Cancel</button>
