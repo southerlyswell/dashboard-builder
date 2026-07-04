@@ -25,6 +25,10 @@ function dashboardBuilder() {
         dataLoading: false,
         schemaData: null,
         schemaLoading: false,
+        dashboardId: null,
+        publicUrl: '',
+        jsonError: '',
+        revisionInfo: '',
         _chartInstances: {},
         _chartObservers: {},
 
@@ -384,26 +388,48 @@ function dashboardBuilder() {
             .then(function(r) { return r.json(); })
             .then(function(resp) {
                 self.dataLoading = false;
-                var data = resp.data || [];
-                if (!Array.isArray(data)) { data = Object.values(data); }
-                data.forEach(function(item) {
-                    var c = cardsWithQueries.find(function(cc) { return cc.id === item.card_id; }) ||
-                            self.dashboard.cards.find(function(cc) { return cc.id === item.card_id; });
-                    if (!c) return;
-                    if (item.error) { c.dataError = item.error; return; }
-                    c.dataError = null;
-                    c._data = item;
-                    if (c.type === 'kpi' || c.type === 'stat') {
-                        var el = document.querySelector('[data-card-id="' + c.id + '"] .stat-value');
-                        if (el && item.value !== undefined) {
-                            var v = item.value;
-                            el.textContent = v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toLocaleString();
-                            el.className = 'stat-value ' + (v > 1000 ? 'green' : v > 500 ? 'amber' : 'red');
+                var data = resp.data || {};
+                if (Array.isArray(data)) {
+                    // Error path: array of {card_id, error} objects
+                    data.forEach(function(item) {
+                        var c = self.dashboard.cards.find(function(cc) { return cc.id === item.card_id; });
+                        if (!c) return;
+                        if (item.error) { c.dataError = item.error; return; }
+                        c.dataError = null;
+                        c._data = item;
+                        if (c.type === 'kpi' || c.type === 'stat') {
+                            var el = document.querySelector('[data-card-id="' + c.id + '"] .stat-value');
+                            if (el && item.value !== undefined) {
+                                var v = item.value;
+                                el.textContent = v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toLocaleString();
+                                el.className = 'stat-value ' + (v > 1000 ? 'green' : v > 500 ? 'amber' : 'red');
+                            }
+                        } else if (['line','bar','donut','funnel','gauge','heatmap','pie','combo','scatter','area','radar'].indexOf(c.type) >= 0) {
+                            self.renderChart(c, item);
                         }
-                    } else if (['line','bar','donut','funnel','gauge','heatmap','pie','combo','scatter','area','radar'].indexOf(c.type) >= 0) {
-                        self.renderChart(c, item);
-                    }
-                });
+                    });
+                } else {
+                    // Success path: object keyed by card ID
+                    Object.keys(data).forEach(function(key) {
+                        var item = data[key];
+                        item.card_id = key;
+                        var c = self.dashboard.cards.find(function(cc) { return cc.id === key; });
+                        if (!c) return;
+                        if (item.error) { c.dataError = item.error; return; }
+                        c.dataError = null;
+                        c._data = item;
+                        if (c.type === 'kpi' || c.type === 'stat') {
+                            var el = document.querySelector('[data-card-id="' + c.id + '"] .stat-value');
+                            if (el && item.value !== undefined) {
+                                var v = item.value;
+                                el.textContent = v >= 1000 ? (v / 1000).toFixed(1) + 'K' : v.toLocaleString();
+                                el.className = 'stat-value ' + (v > 1000 ? 'green' : v > 500 ? 'amber' : 'red');
+                            }
+                        } else if (['line','bar','donut','funnel','gauge','heatmap','pie','combo','scatter','area','radar'].indexOf(c.type) >= 0) {
+                            self.renderChart(c, item);
+                        }
+                    });
+                }
             })
             .catch(function(e) {
                 console.error('Query fetch failed:', e.message);
@@ -482,7 +508,7 @@ function dashboardBuilder() {
             // Up: find next empty row
             if (dir === 'up') {
                 while (newY >= 0 && cards.find(function(c) { return c.id !== card.id && c.col === newX && c.row === newY; })) newY--;
-                if (newY < 0) newY = 0;
+                if (newY < 0) return; // no empty slot above, don't move
             }
 
             card.col = newX;
@@ -553,7 +579,9 @@ function dashboardBuilder() {
         },
 
         showRevisions() {
-            alert(this.revisions.length + ' revisions available (index: ' + this.revisionIndex + ')');
+            this.revisionInfo = this.revisions.length + ' revisions available (index: ' + this.revisionIndex + ')';
+            var self = this;
+            setTimeout(function() { self.revisionInfo = ''; }, 4000);
         },
 
         // ===== Filters =====
@@ -607,7 +635,7 @@ function dashboardBuilder() {
             try {
                 var json = JSON.parse(this.jsonEditorText);
                 if (json.dashboard) json = json.dashboard;
-                if (!json.cards || !json.cards.length) { alert('JSON must have a "cards" array.'); return; }
+                if (!json.cards || !json.cards.length) { this.jsonError = 'JSON must have a "cards" array.'; return; }
                 var self = this;
                 json.cards = json.cards.map(function(c, i) {
                     if (!c.id) c.id = 'card-' + i;
@@ -620,7 +648,7 @@ function dashboardBuilder() {
                 this.addRevision(json);
                 this.showJSONPanel = false;
                 this.$nextTick(function() { self.renderGrid(); });
-            } catch(e) { alert('Invalid JSON: ' + e.message); }
+            } catch(e) { this.jsonError = 'Invalid JSON: ' + e.message; }
         },
 
         // ===== Save =====

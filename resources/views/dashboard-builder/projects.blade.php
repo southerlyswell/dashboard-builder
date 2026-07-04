@@ -162,5 +162,5 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-<script src="/js/clients.js?v=1"></script>
+<script src="/js/clients.js?v=2"></script>
 @endsection

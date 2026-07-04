@@ -1,0 +1,21 @@
+const { chromium } = require('playwright');
+(async () => {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+  await page.goto('http://dashboard-builder/login', { waitUntil: 'domcontentloaded' });
+  await page.fill('input[name="email"]', 'admin@dashboard-builder.test');
+  await page.fill('input[name="password"]', 'password');
+  await page.click('button[type="submit"]');
+  await page.waitForURL('**/projects', { timeout: 10000 });
+  await page.goto('http://dashboard-builder/dashboard-builder?client=1', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(3000);
+  console.log('URL:', page.url());
+  console.log('Title:', await page.title());
+  const btns = await page.evaluate(() => Array.from(document.querySelectorAll('button')).map(b => b.textContent.trim()).filter(Boolean).join(' | '));
+  console.log('Buttons:', btns);
+  const taCount = await page.evaluate(() => document.querySelectorAll('textarea').length);
+  console.log('Textareas:', taCount);
+  const fbCount = await page.evaluate(() => document.querySelectorAll('.filter-bar').length);
+  console.log('Filter bars:', fbCount);
+  await browser.close();
+})();

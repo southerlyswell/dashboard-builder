@@ -70,6 +70,7 @@
                 <button class="btn btn-outline" @click="toggleChat()" x-show="dashboard && !showSchema" x-text="chatVisible ? 'Chat' : 'Chat'"></button>
                 <button class="btn btn-outline" @click="undoDashboard()" x-show="dashboard && !showSchema && revisions.length > 1">Undo</button>
                 <button class="btn btn-outline" @click="showRevisions()" x-show="dashboard && !showSchema && revisions.length > 1">Revisions</button>
+                <span x-show="revisionInfo" style="color:#FB923C;font-size:11px;margin-left:8px;" x-text="revisionInfo"></span>
                 <button class="btn btn-outline" @click="toggleJSON()" x-show="dashboard && !showSchema" x-text="showJSONPanel ? 'Close JSON' : 'JSON'"></button>
                 <a class="btn btn-outline" href="/dashboard-builder/projects" style="text-decoration:none;">Projects</a>
                 <button class="btn-save" @click="saveDashboard()" :disabled="saveStatus === 'saving'" x-show="dashboard && !showSchema">
@@ -221,13 +222,14 @@
                 </div>
             </div>
             <textarea x-model="jsonEditorText" class="json-editor" spellcheck="false"></textarea>
+            <div x-show="jsonError" style="color:#f87171;padding:8px 14px;font-size:12px;" x-text="jsonError"></div>
             <div class="json-footer">Edit the JSON, then click Apply to update the dashboard preview</div>
         </div>
     </div>
 
 </div>
 
-<script src="/js/dashboard-builder.js?v=13"></script>
+<script src="/js/dashboard-builder.js?v=14"></script>
 <script>window.ACFS_CONFIG = { clientId: '{{ $activeClient?->id }}' };</script>
 </body>
 </html>
