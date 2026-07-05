@@ -124,9 +124,9 @@
     </div>
 
     <!-- Card Edit Modal -->
-    <div x-show="cardEditModal" @click.self="cardEditModal = null" @keydown.escape.window="cardEditModal = null" class="modal-overlay" x-cloak>
-        <div @click.stop class="modal-card">
-            <div class="modal-header" style="position:relative;">
+    <div x-show="cardEditModal" @keydown.escape.window="cardEditModal = null" class="modal-overlay" x-cloak @mousemove="doModalDrag($event)" @mouseup="stopModalDrag()" @mouseleave="stopModalDrag()">
+        <div @click.stop class="modal-card" :style="'transform: translate(' + modalX + 'px, ' + modalY + 'px);'">
+            <div class="modal-header" style="position:relative;cursor:grab;" @mousedown="startModalDrag($event)" :class="{'cursor-grabbing': modalDrag}">
                 <button @click="cardEditModal = null" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#64748b;font-size:20px;cursor:pointer;line-height:1;padding:0 4px;">&times;</button>
                 <div class="modal-type" x-text="cardEditModal?.type || 'Card'"></div>
                 <div class="modal-title" x-text="cardEditModal?.title || cardEditModal?.id || 'Untitled'"></div>

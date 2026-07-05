@@ -234,8 +234,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* Card Edit Modal */
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 110; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; }
-.modal-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; width: 400px; display: flex; flex-direction: column; }
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 110; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; pointer-events: none; }
+.modal-card { background: #0f172a; border: 1px solid #334155; border-radius: 12px; width: 400px; display: flex; flex-direction: column; pointer-events: auto; }
 .modal-header { padding: 14px 16px; background: #1e293b; border-radius: 12px 12px 0 0; border-bottom: 1px solid #334155; }
 .modal-type { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
 .modal-title { font-size: 15px; color: #FB923C; font-weight: 600; margin-top: 2px; }

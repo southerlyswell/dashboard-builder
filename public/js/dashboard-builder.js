@@ -29,6 +29,11 @@ function dashboardBuilder() {
         publicUrl: '',
         jsonError: '',
         revisionInfo: '',
+        modalDrag: false,
+        modalX: 0,
+        modalY: 0,
+        modalDragStartX: 0,
+        modalDragStartY: 0,
         _chartInstances: {},
         _chartObservers: {},
 
@@ -683,6 +688,21 @@ function dashboardBuilder() {
         // ===== Client Switch =====
         switchClient() {
             window.location.href = '/dashboard-builder?client=' + this.activeClient;
+        },
+
+        // ===== Modal Drag =====
+        startModalDrag(e) {
+            this.modalDrag = true;
+            this.modalDragStartX = e.clientX - this.modalX;
+            this.modalDragStartY = e.clientY - this.modalY;
+        },
+        doModalDrag(e) {
+            if (!this.modalDrag) return;
+            this.modalX = e.clientX - this.modalDragStartX;
+            this.modalY = e.clientY - this.modalDragStartY;
+        },
+        stopModalDrag() {
+            this.modalDrag = false;
         }
     };
 }
