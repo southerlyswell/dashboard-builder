@@ -1,0 +1,115 @@
+{
+    "title": "FMSystem Overview",
+    "theme": "dark",
+    "cards": [
+        {
+            "id": "title-1",
+            "type": "title",
+            "title": "FMSystem Overview",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 0
+        },
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "# Projects",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) AS value FROM projects",
+            "col": 0,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 87,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        87
+                    ]
+                ],
+                "card_id": "kpi-1"
+            }
+        },
+        {
+            "id": "kpi-2",
+            "type": "kpi",
+            "title": "# Branches",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) AS value FROM branches",
+            "col": 1,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 16,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        16
+                    ]
+                ],
+                "card_id": "kpi-2"
+            }
+        },
+        {
+            "id": "kpi-3",
+            "type": "kpi",
+            "title": "# Staff",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) AS value FROM staff",
+            "col": 2,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 30,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        30
+                    ]
+                ],
+                "card_id": "kpi-3"
+            }
+        },
+        {
+            "id": "kpi-4",
+            "type": "kpi",
+            "title": "Avg Staff per Branch",
+            "w": 2,
+            "h": 3,
+            "query": "SELECT COALESCE(ROUND((SELECT COUNT(*) FROM staff) / NULLIF((SELECT COUNT(*) FROM branches), 0), 1), 0) AS value",
+            "col": 0,
+            "row": 5,
+            "dataError": null,
+            "_data": {
+                "value": "1.9",
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        "1.9"
+                    ]
+                ],
+                "card_id": "kpi-4"
+            }
+        }
+    ]
+}
