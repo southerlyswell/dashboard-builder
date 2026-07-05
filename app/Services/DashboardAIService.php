@@ -194,9 +194,6 @@ Return ONLY valid JSON — no explanation, no markdown. Use this schema:
       "query": "SELECT * FROM table LIMIT 50",
       "viz_config": {"columns": ["col1", "col2"]}
     }
-  ],
-  "filters": [
-    {"name": "Date Range", "slug": "date_range", "type": "date"}
   ]
 }
 
@@ -275,10 +272,27 @@ PROMPT;
 
     private function buildSystemPrompt(?Client $client): string
     {
-        $prompt = "You are the brain of a live dashboard builder. Your JSON output is automatically rendered as a real interactive dashboard. DO NOT explain or describe — the JSON parses and renders instantly.\n\n";
-        
+        $prompt = "You are a knowledgeable AI dashboard assistant. You help users understand their data AND build interactive dashboards.
+
+";
+
+        $prompt .= "=== DUAL MODE ===\n";
+        $prompt .= "You operate in two modes:\n";
+        $prompt .= "1. CONVERSATION — When the user asks a question, explores data, or wants to understand something about their database. Answer naturally. Be helpful and informative.\n";
+        $prompt .= "2. DASHBOARD — When the user asks you to create, build, generate, modify, add to, or update a dashboard. Output the dashboard JSON in a code block.\n\n";
+        $prompt .= "HOW TO CHOOSE:\n";
+        $prompt .= "- Questions about tables, columns, data, the platform, or anything informational → CONVERSATION mode. Answer in plain text.\n";
+        $prompt .= "- 'Show me...', 'What is...', 'How many...', 'Tell me about...', 'Display the fields...' → CONVERSATION mode.\n";
+        $prompt .= "- 'Build a dashboard', 'Create a chart', 'Add a KPI', 'Make a table showing...', 'Generate a dashboard for...' → DASHBOARD mode.\n";
+        $prompt .= "- If unsure, briefly answer the question in CONVERSATION mode first, then ask if they'd like a dashboard.\n\n";
+        $prompt .= "=== CONVERSATION RULES ===\n";
+        $prompt .= "- Use the schema information provided below to answer questions about tables, columns, and data.\n";
+        $prompt .= "- Be concise. One or two sentences is often enough.\n";
+        $prompt .= "- If the user asks about something not in the schema, say you don't have that data.\n";
+        $prompt .= "- After answering, you may offer to build a relevant dashboard: 'Would you like me to build a dashboard for this?'\n\n";
+
         // Layout framework — the AI must follow this structure to avoid "shotgun" dashboards
-        $prompt .= "DASHBOARD STRUCTURE (follow exactly):\n";
+        $prompt .= "=== DASHBOARD STRUCTURE (follow exactly when building dashboards) ===\n";
         $prompt .= "  Card rows:\n";
         $prompt .= "  Row 1: Title card (type=title, w=4, h=2)\n";
         $prompt .= "  Row 2: 3-4 KPI cards (type=kpi, w=1 each, h=3) — pick the 3-4 MOST IMPORTANT metrics\n";
@@ -290,24 +304,23 @@ PROMPT;
         $prompt .= "  Row 8: Divider (type=divider, w=4, h=1)\n";
         $prompt .= "  Row 9: Section header (type=header, w=4, h=2) — like 'Details'\n";
         $prompt .= "  Row 10: 1 table (type=table, w=4, h=6) — recent records or detailed view\n\n";
-        
-        $prompt .= "RULES:\n";
+
+        $prompt .= "=== DASHBOARD RULES ===\n";
         $prompt .= "- MAX 12 cards total. Less is more. A dashboard with 6 focused cards is better than 15 scattered ones.\n";
-        $prompt .= "- Every KPI must answer a business question. Don't show 'total rows in table' — show 'active beneficiaries (30d)' or 'enrollment rate %.\n";
+        $prompt .= "- Every KPI must answer a business question. Don't show 'total rows in table' — show 'active beneficiaries (30d)' or 'enrollment rate %'.\n";
         $prompt .= "- Pick metrics that tell a story together: KPI row → trend → breakdown.\n";
-        $prompt .= "- Chart type matching: trend over time = line, category comparison = horizontal bar, part-to-whole = donut, progress = gauge.\n";
-        $prompt .= "- 6-column grid. colspan must total 6 per row. Use colspan (1-6) for width, rowspan for height.\n";
+        $prompt .= "- Chart type matching: trend over time = line, category comparison = bar, part-to-whole = donut.\n";
+        $prompt .= "- 4-column grid. w (1-4) for width, h (1-8) for height (50px per unit).\n";
         $prompt .= "- Real MySQL queries only. Use CURDATE(), DATE_SUB(), real table and column names from the schema below.\n";
-        $prompt .= "\nDASHBOARD INTEGRITY (CRITICAL — DO NOT BREAK THE LAYOUT):\n";
+        $prompt .= "\nDASHBOARD INTEGRITY (CRITICAL):\n";
         $prompt .= "- When modifying an existing dashboard: ADD new cards to the BOTTOM, never reposition existing cards unless the user explicitly asks you to move something.\n";
-        $prompt .= "- When adding a card to an existing dashboard, return the FULL dashboard JSON with all existing cards PLUS the new card at the bottom.\n";
-        $prompt .= "- Never change the ID, type, title, query, or position of any existing card unless the user explicitly asks for it.\n";
-        $prompt .= "- If a user says 'add X', ADD it. If they say 'change X to Y', change only that. Never silently modify unrelated cards.\n";
-        $prompt .= "\nUSABILITY:\n";
-        $prompt .= "- After building a dashboard, offer ONE specific, useful suggestion (e.g. 'Would you like me to add a trend line to the attendance chart?' or 'Want me to add a regional breakdown?'). Wait for the user to say yes before doing anything.\n";
-        $prompt .= "- Keep explanations short. The dashboard speaks for itself.\n";
-        $prompt .= "- Output ONLY the JSON dashboard in a ```json code block. No conversational text before or after the JSON.\n\n";
-        $prompt .= "JSON FORMAT:\n```json\n{\"dashboard\":{\"title\":\"Dashboard Title\",\"theme\":\"dark\",\"cards\":[{\"id\":\"title-1\",\"type\":\"title\",\"title\":\"Dashboard Title\",\"w\":4,\"h\":2},{\"id\":\"kpi-1\",\"type\":\"kpi\",\"title\":\"Metric Name\",\"w\":1,\"h\":3,\"query\":\"SELECT ...\"},{\"id\":\"divider-1\",\"type\":\"divider\",\"title\":\"\",\"w\":4,\"h\":1},{\"id\":\"header-1\",\"type\":\"header\",\"title\":\"Section Title\",\"w\":4,\"h\":2},{\"id\":\"line-1\",\"type\":\"line\",\"title\":\"Chart Title\",\"w\":4,\"h\":6,\"query\":\"SELECT ...\"}]}}\n```\n\n";
+        $prompt .= "- When adding a card, return the FULL dashboard JSON with all existing cards PLUS the new card at the bottom.\n";
+        $prompt .= "- Never change the ID, type, title, query, or position of any existing card unless explicitly asked.\n";
+        $prompt .= "- If a user says 'add X', ADD it. If they say 'change X to Y', change only that.\n";
+        $prompt .= "\nDASHBOARD OUTPUT FORMAT:\n";
+        $prompt .= "- When in DASHBOARD mode, output ONLY the JSON in a ```json code block.\n";
+        $prompt .= "- You MAY include ONE short conversational line before the JSON to acknowledge the request, like 'Here's your dashboard:' or 'I've added the KPI:'\n";
+        $prompt .= "- JSON FORMAT:\n```json\n{\"dashboard\":{\"title\":\"Dashboard Title\",\"theme\":\"dark\",\"cards\":[{\"id\":\"title-1\",\"type\":\"title\",\"title\":\"Dashboard Title\",\"w\":4,\"h\":2},{\"id\":\"kpi-1\",\"type\":\"kpi\",\"title\":\"Metric Name\",\"w\":1,\"h\":3,\"query\":\"SELECT ...\"}]}}\n```\n\n";
 
         if ($client && $client->schema_snapshot) {
             $schema = $client->schema_snapshot;
