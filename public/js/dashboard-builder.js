@@ -290,9 +290,15 @@ function dashboardBuilder() {
                     '<div class="card-title">' + (c.title || '') + '</div>' +
                     '<div class="card-chart" id="chart-container-' + c.id + '"></div>';
             } else if (c.type === 'table') {
+                var tblCols = c._data ? c._data.columns : (c.columns || []);
+                var tblRows = c._data ? c._data.rows : [];
                 h = '<div class="card-label">' + (c.id || '') + '</div>' +
                     '<div class="card-title">' + (c.title || '') + '</div>' +
-                    '<div style="margin-top:4px;font-size:11px;color:#94a3b8;">' + ((c.columns || []).join(' | ') || 'table data') + '</div>';
+                    '<div class="table-container" id="table-container-' + c.id + '"><table class="data-table"><thead><tr>' +
+                    tblCols.map(function(col) { return '<th>' + (col || '') + '</th>'; }).join('') +
+                    '</tr></thead><tbody>' +
+                    (tblRows.length ? tblRows.map(function(row) { return '<tr>' + (row || []).map(function(cell) { return '<td>' + (cell !== null && cell !== undefined ? cell : '') + '</td>'; }).join('') + '</tr>'; }).join('') : '<tr><td colspan="' + (tblCols.length || 1) + '" style="text-align:center;color:#64748b;padding:20px;">No data</td></tr>') +
+                    '</tbody></table></div>';
             } else {
                 h = '<div class="card-label">' + (c.id || '') + '</div>' +
                     '<div class="card-title">' + (c.title || '') + '</div>' +
@@ -377,6 +383,25 @@ function dashboardBuilder() {
             });
         },
 
+        // ===== Table Rendering =====
+        renderTable(c, data) {
+            if (!data || !data.columns || !data.rows) {
+                if (data && data.error) {
+                    var container = document.getElementById('table-container-' + c.id);
+                    if (container) container.innerHTML = '<div style="text-align:center;padding:20px;color:#f87171;font-size:12px;">' + data.error + '</div>';
+                }
+                return;
+            }
+            var container = document.getElementById('table-container-' + c.id);
+            if (!container) return;
+            container.innerHTML = '<table class="data-table"><thead><tr>' +
+                data.columns.map(function(col) { return '<th>' + (col || '') + '</th>'; }).join('') +
+                '</tr></thead><tbody>' +
+                data.rows.map(function(row) { return '<tr>' + (row || []).map(function(cell) { return '<td>' + (cell !== null && cell !== undefined ? cell : '') + '</td>'; }).join('') + '</tr>'; }).join('') +
+                '</tbody></table>' +
+                '<div style="padding:6px 12px;font-size:11px;color:#64748b;border-top:1px solid #334155;">' + data.row_count + ' rows</div>';
+        },
+
         // ===== Data Fetching =====
         fetchCardData() {
             if (!this.activeClient || !this.dashboard || !this.dashboard.cards) return;
@@ -411,6 +436,8 @@ function dashboardBuilder() {
                             }
                         } else if (['line','bar','donut','funnel','gauge','heatmap','pie','combo','scatter','area','radar'].indexOf(c.type) >= 0) {
                             self.renderChart(c, item);
+                        } else if (c.type === 'table') {
+                            self.renderTable(c, item);
                         }
                     });
                 } else {
@@ -432,6 +459,8 @@ function dashboardBuilder() {
                             }
                         } else if (['line','bar','donut','funnel','gauge','heatmap','pie','combo','scatter','area','radar'].indexOf(c.type) >= 0) {
                             self.renderChart(c, item);
+                        } else if (c.type === 'table') {
+                            self.renderTable(c, item);
                         }
                     });
                 }
