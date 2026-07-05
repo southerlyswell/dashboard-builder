@@ -126,14 +126,22 @@
     <!-- Card Edit Modal -->
     <div x-show="cardEditModal" @click.self="cardEditModal = null" @keydown.escape.window="cardEditModal = null" class="modal-overlay" x-cloak>
         <div @click.stop class="modal-card">
-            <div class="modal-header">
+            <div class="modal-header" style="position:relative;">
+                <button @click="cardEditModal = null" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#64748b;font-size:20px;cursor:pointer;line-height:1;padding:0 4px;">&times;</button>
                 <div class="modal-type" x-text="cardEditModal?.type || 'Card'"></div>
                 <div class="modal-title" x-text="cardEditModal?.title || cardEditModal?.id || 'Untitled'"></div>
                 <div class="modal-id" x-text="'ID: ' + (cardEditModal?.id || '—')"></div>
             </div>
             <div class="modal-body">
-                <div class="modal-section-label">Width (columns)</div>
-                <div class="modal-width-row">
+                <!-- Deleted state -->
+                <div x-show="cardEditModal?._deleted" style="text-align:center;padding:20px 0;color:#64748b;">
+                    <div style="font-size:14px;color:#f87171;margin-bottom:8px;">This card has been deleted</div>
+                    <div style="font-size:12px;">Click any visible card to edit it</div>
+                </div>
+                <!-- Normal controls -->
+                <div x-show="!cardEditModal?._deleted">
+                    <div class="modal-section-label">Width (columns)</div>
+                    <div class="modal-width-row">
                     <template x-for="n in [1,2,3,4]">
                         <button @click="resizeCardWidth(n)" class="width-btn" :class="(cardEditModal?.w || cardEditModal?.colspan || 2) === n ? 'width-btn-active' : ''" x-text="n"></button>
                     </template>
@@ -147,11 +155,11 @@
                 <div class="modal-section-label">Move</div>
                 <div class="modal-move-grid">
                     <div></div>
-                    <button @click="moveCard('up'); cardEditModal = null" class="move-btn" title="Move up">↑</button>
+                    <button @click="moveCard('up')" class="move-btn" title="Move up">↑</button>
                     <div></div>
-                    <button @click="moveCard('left'); cardEditModal = null" class="move-btn" title="Move left">←</button>
-                    <button @click="moveCard('down'); cardEditModal = null" class="move-btn" title="Move down">↓</button>
-                    <button @click="moveCard('right'); cardEditModal = null" class="move-btn" title="Move right">→</button>
+                    <button @click="moveCard('left')" class="move-btn" title="Move left">←</button>
+                    <button @click="moveCard('down')" class="move-btn" title="Move down">↓</button>
+                    <button @click="moveCard('right')" class="move-btn" title="Move right">→</button>
                 </div>
                 <div class="modal-action-row">
                     <button @click="deleteCard()" class="btn-delete">Delete Card</button>
@@ -179,7 +187,7 @@
 
 </div>
 
-<script src="/js/dashboard-builder.js?v=15"></script>
+<script src="/js/dashboard-builder.js?v=16"></script>
 <script>window.ACFS_CONFIG = { clientId: '{{ $activeClient?->id }}' };</script>
 </body>
 </html>

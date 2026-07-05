@@ -513,7 +513,6 @@ function dashboardBuilder() {
 
             card.col = newX;
             card.row = newY;
-            this.cardEditModal = null;
             this.addRevision(this.dashboard);
             var self = this;
             this.$nextTick(function() { self.renderGrid(); });
@@ -557,8 +556,9 @@ function dashboardBuilder() {
             var self = this;
             var idx = this.dashboard.cards.findIndex(function(c) { return c.id === self.cardEditModal.id; });
             if (idx < 0) return;
+            var deletedId = this.cardEditModal.id;
             this.dashboard.cards.splice(idx, 1);
-            this.cardEditModal = null;
+            this.cardEditModal = { id: deletedId, type: 'deleted', title: 'Card Deleted', _deleted: true };
             this.addRevision(this.dashboard);
             this.$nextTick(function() { self.renderGrid(); });
         },

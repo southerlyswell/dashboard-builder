@@ -51,7 +51,6 @@
             <div class="quick-actions">
                 <button class="quick-btn" @click="toggleSchema()">Schema</button>
                 <button class="quick-btn" @click="sendQuick('Build a management overview dashboard with KPIs, trends, and breakdowns')">Overview</button>
-                <button class="quick-btn" @click="sendQuick('Add filters for date range and branch')">Filters</button>
                 <button class="quick-btn" @click="sendQuick('Show me the JSON for this dashboard')">JSON</button>
             </div>
 
@@ -113,35 +112,6 @@
             </div>
 
             <!-- Filter cluster -->
-            <template x-if="dashboard && dashboard.filters">
-                <div class="filter-row">
-                    <template x-for="f in (dashboard.filters || [])" :key="f.id">
-                        <div class="filter-kpi" :class="activeFilters[f.id] ? 'filter-kpi-active' : ''">
-                            <div class="filter-dot-row">
-                                <span class="filter-dot" :style="'background:' + (f.type === 'date_range' ? '#38bdf8' : f.type === 'dropdown' ? '#4ade80' : '#fb923c')"></span>
-                            </div>
-                            <div class="filter-label" x-text="f.label"></div>
-                            <div class="filter-value" x-text="activeFilters[f.id] || (f.type === 'date_range' ? 'Last 30 days' : f.type === 'dropdown' ? 'All' : '—')"></div>
-                            <div class="filter-controls">
-                                <div x-show="f.type === 'date_range'" class="filter-pills">
-                                    <button @click="setFilter(f.id, 'last_7_days')" :class="activeFilters[f.id] === 'last_7_days' ? 'pill active' : 'pill'">7d</button>
-                                    <button @click="setFilter(f.id, 'last_30_days')" :class="activeFilters[f.id] === 'last_30_days' || !activeFilters[f.id] ? 'pill active' : 'pill'">30d</button>
-                                    <button @click="setFilter(f.id, 'last_90_days')" :class="activeFilters[f.id] === 'last_90_days' ? 'pill active' : 'pill'">90d</button>
-                                    <button @click="setFilter(f.id, 'all_time')" :class="activeFilters[f.id] === 'all_time' ? 'pill active' : 'pill'">All</button>
-                                </div>
-                                <select x-show="f.type === 'dropdown'" @change="setFilter(f.id, $event.target.value)" class="filter-select">
-                                    <option value="">All</option>
-                                </select>
-                                <label x-show="f.type === 'toggle'" class="filter-toggle">
-                                    <input type="checkbox" @change="setFilter(f.id, $event.target.checked)">
-                                    <span>Active</span>
-                                </label>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-            </template>
-
             <!-- Progress overlay -->
             <div x-show="loading" class="progress-overlay">
                 <div class="loading loading-lg"></div>
