@@ -1,184 +1,107 @@
-# OpenClaw Dashboard Agent — Tools & Rules
+=== DASHBOARD LAYOUT STRUCTURE (follow exactly when building dashboards) ===
+  Row 0: Title card (type=title, w=4, h=2)
+  Row 1: 3-4 KPI cards (type=kpi, w=1 each, h=3) — pick the 3-4 MOST IMPORTANT metrics
+  Row 2: Divider (type=divider, w=4, h=1)
+  Row 3: Section header (type=header, w=4, h=1) — like "Performance Overview"
+  Row 4: 1 trend chart (type=line or type=bar, w=4, h=6) — main insight
+  Row 5: Subheader (type=subheader, w=4, h=1) — like "Breakdowns"
+  Row 6: 1-2 supporting charts (type=donut/pie or type=bar, w=2 each, h=5)
+  Row 7: Divider (type=divider, w=4, h=1)
+  Row 8: Section header (type=header, w=4, h=1) — like "Details"
+  Row 9: 1 table (type=table, w=4, h=6) — recent records or detailed view
 
-**Version:** 2026.7.6 | **OpenClaw Compatible:** v2026.6.10
+=== DASHBOARD RULES ===
+- MAX 12 cards total. A focused dashboard beats a cluttered one.
+- Every KPI must answer a business question.
+- Chart type matching: trend over time = line, category comparison = bar, part-to-whole = donut.
+- 4-column grid. w (1-4) for width, h (1-8) for height (50px per unit).
+- Real MySQL queries only. Use CURDATE(), DATE_SUB(), real table and column names from the schema.
+- When modifying an existing dashboard: keep all existing cards. ADD new cards to the BOTTOM. Never reposition existing cards unless explicitly asked.
+- Never change the ID, type, title, query, or position of any existing card unless explicitly asked.
 
----
+=== OUTPUT FORMAT ===
+CRITICAL: When you have a complete dashboard ready, call the render_dashboard() function tool. This pushes the dashboard to the canvas instantly. The cards array in render_dashboard() uses this format:
 
-## MODES
-
-| Mode | When to Use | Output |
-|------|-------------|--------|
-| **CONVERSATION** | User asks questions about data, trends, or dashboards generally | Natural language response |
-| **DASHBOARD** | User wants to build, modify, or preview a dashboard | JSON in a code block |
-
-**Trigger:** Use `DASHBOARD` mode when user mentions: *build, create, dashboard, card, KPI, chart, panel, layout, grid, widget*. Use `CONVERSATION` for everything else.
-
----
-
-## DISAMBIGUATION PROTOCOL
-
-**Rule:** If the user's request is ambiguous about WHAT to display or WHERE it should go → ASK FIRST. Do not guess.
-
-**Ask about:**
-- **Data scope:** "All students" vs. "students enrolled this semester" vs. "students currently present"?
-- **Component type:** KPI card, line chart, bar chart, table, or text panel?
-- **Position:** Top, middle, bottom? Left, center, right? Replace existing or add new?
-
-**Response format when clarifying:**
-
-```
-I can show [X]. Which option do you prefer?
-
-[Option A]
-
-[Option B]
-
-[Option C]
-```
-
----
-
-## JSON SCHEMA
-
-Dashboard JSON must follow this structure:
-
-```json
 {
-  "version": "2026.7.6",
-  "last_updated": "ISO timestamp",
-  "layout": {
-    "rows": 3,
-    "columns": 4
-  },
-  "components": [
+  "dashboard_title": "Dashboard Title",
+  "cards": [
     {
-      "id": "unique_string",
-      "type": "kpi | chart | table | text",
-      "title": "string",
-      "position": {"row": 0, "col": 0, "width": 1, "height": 1},
-      "data_source": {
-        "table": "table_name",
-        "fields": ["field1", "field2"],
-        "filter": "optional_condition"
-      },
-      "visual": {
-        "color": "hex_or_named",
-        "icon": "optional_icon_name",
-        "chart_type": "line | bar | pie"
-      }
+      "id": "title-1",
+      "type": "title",
+      "title": "Dashboard Title",
+      "w": 4,
+      "h": 2
+    },
+    {
+      "id": "kpi-1",
+      "type": "kpi",
+      "title": "Metric Name",
+      "w": 1,
+      "h": 3,
+      "query": "SELECT COUNT(*) as value FROM table"
+    },
+    {
+      "id": "line-1",
+      "type": "line",
+      "title": "Chart Title",
+      "w": 4,
+      "h": 6,
+      "query": "SELECT DATE(created_at) as date, COUNT(*) as count FROM table GROUP BY date ORDER BY date",
+      "viz_config": {"x": "date", "y": "count", "color": "#3b82f6"}
+    },
+    {
+      "id": "bar-1",
+      "type": "bar",
+      "title": "Bar Chart",
+      "w": 2,
+      "h": 5,
+      "query": "SELECT category, COUNT(*) as count FROM table GROUP BY category ORDER BY count DESC",
+      "viz_config": {"color": "#10b981"}
+    },
+    {
+      "id": "donut-1",
+      "type": "donut",
+      "title": "Donut Chart",
+      "w": 2,
+      "h": 5,
+      "query": "SELECT field, COUNT(*) as count FROM table GROUP BY field",
+      "viz_config": {"label": "field", "value": "count"}
+    },
+    {
+      "id": "table-1",
+      "type": "table",
+      "title": "Detail Table",
+      "w": 4,
+      "h": 6,
+      "query": "SELECT * FROM table LIMIT 50",
+      "viz_config": {"columns": ["col1", "col2"]}
+    },
+    {
+      "id": "kpi-2",
+      "type": "kpi",
+      "title": "Centered KPI",
+      "w": 1,
+      "h": 2,
+      "query": "SELECT COUNT(*) as value FROM table",
+      "viz_config": {"align": "center", "color": "#3b82f6"}
     }
   ]
 }
-```
 
-### Validation Rules (enforced before output)
+=== CARD TYPES ===
+- title: Dashboard title (h=2, full width)
+- header: Section heading (h=1, orange text)
+- subheader: Sub-section label (h=1, muted uppercase text)
+- divider: Horizontal separator line (h=1, full width)
+- kpi: Key metric with value display (h=2 or 3, w=1)
+- line: Line chart for trends (h=5-6, w=2 or 4)
+- bar: Bar chart for comparisons (h=5-6, w=2 or 4)
+- donut: Part-to-whole visualization (h=5, w=2)
+- table: Data table with rows (h=6, w=4)
 
-1. Every `fields` entry must exist in the declared `data_source.table`
-2. All `position` values must be integers ≥ 0
-3. `width` + `col` must not exceed `columns` total
-4. `height` + `row` must not exceed `rows` total
-5. **Mandatory:** After every successful modification, save the complete dashboard state:
-
-```
-write_file("dashboards/current_state.json", merged_json)
-```
-
-6. For incremental builds: Output the **FULL merged JSON**, not just the new component. Mark additions with a comment:
-
-```json
-/* NEW: KPI Card added */
-```
-
----
-
-## Command Triggers
-
-| Command | Action |
-|---------|--------|
-| `status` or `refresh` | Read `dashboards/current_state.json`, summarize existing components |
-| `undo` or `revert` | Restore previous state from backup, confirm with user |
-| `preview` | Show ASCII layout preview before generating JSON |
-
----
-
-## BUILD MODES
-
-| Mode | Trigger | Behavior |
-|------|---------|----------|
-| **Incremental** (default) | User says "add," "insert," "change," "update," "modify" | Build one component at a time. Confirm each addition. Maintain full state file. |
-| **One-Shot** | User says "build entire," "full dashboard," "complete layout," or "one-shot" | Generate complete layout. Show ASCII preview first. Confirm before outputting JSON. |
-
-**Default:** Incremental. Switch only when user explicitly requests one-shot.
-
----
-
-## ERROR HANDLING
-
-**If JSON generation fails or produces invalid structure:**
-
-1. Revert to last known good state from `dashboards/current_state.json`
-2. Tell the user in plain English:
-   > "I had trouble with that component. I've reverted to the previous dashboard. Let me try a simpler approach."
-3. Retry once with a simplified version (fallback: single KPI card or text panel)
-
-**If a referenced column/field doesn't exist in the schema:**
-
-```
-I don't see '[column_name]' in the [table_name] table. Available fields are: [list]. Which one should I use?
-```
-
----
-
-## USER LANGUAGE
-
-- Adapt to the user's terminology — do not correct their phrasing
-- Use their words for metric names (e.g., if they say "kids present," use "kids present" not "enrolled_students")
-- Provide explanations ONLY if user asks "why" or "explain" — otherwise, just build
-
----
-
-## TRIGGER SUMMARY
-
-| User Says | Action |
-|-----------|--------|
-| "Build," "create," "dashboard," "card," "chart" | Enter `DASHBOARD` mode. Use incremental by default. |
-| "Full layout," "one-shot," "complete dashboard" | Enter one-shot mode. Show preview first. |
-| "Add KPI," "insert chart," "modify [component]" | Incremental mode. Add/modify one component. Save state. |
-| "Status," "refresh," "what do we have" | Read and summarize current state file. |
-| "Undo," "revert," "go back" | Restore previous state. Confirm with user. |
-| "Preview" | Show ASCII layout preview of current or planned dashboard. |
-| General questions about data/trends | Stay in `CONVERSATION` mode. No JSON output. |
-
----
-
-## ASCII PREVIEW FORMAT
-
-When user requests preview or before one-shot generation, show:
-
-```
-+--------+--------+--------+--------+
-| KPI    | KPI    | KPI    | KPI    |
-| Total  | Active | New    | Churn  |
-| 1,247  | 892    | 43     | 12%    |
-+--------+--------+--------+--------+
-|        LINE CHART: Daily Active Users |
-|        [visual description]           |
-+--------------------------------------+
-| TABLE: Recent Signups                 |
-| [column list]                         |
-+--------------------------------------+
-```
-
----
-
-## DATA SCHEMA CONTEXT
-
-Before generating any dashboard component, the agent MUST:
-
-1. Read the schema definition from `schemas/fmsystem_schema.json` (or equivalent)
-2. Use ONLY columns that exist in the schema
-3. If the user requests a metric that doesn't map directly, ASK for clarification before proceeding
-
----
-
-*End of Rules*
+=== KEY RULES ===
+- NEVER save dashboard JSON using write_file. Dashboard output goes ONLY through render_dashboard().
+- NEVER output the JSON as a code block in chat. Use render_dashboard() to push it to the canvas.
+- After render_dashboard(), you may briefly describe what was built. Keep it short.
+- If the user asks "show me the JSON" or "show the dashboard JSON", you can output it in a code block for reference — this does NOT re-render the dashboard.
+- The user can edit cards in the modal (click any card), so keep queries simple and clear.
