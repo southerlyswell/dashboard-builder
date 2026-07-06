@@ -116,6 +116,7 @@ function dashboardBuilder() {
                     this.messages.push({ id: this.msgId++, role: 'assistant', content: data.content || 'No response' });
                     this.tryParseDashboard(data.content);
                 }
+                delete data._render_dashboard;
             } catch (e) {
                 this.messages.push({ id: this.msgId++, role: 'assistant', content: 'Connection error. Please try again.' });
             }
@@ -175,7 +176,7 @@ function dashboardBuilder() {
                     if (!c.h) c.h = c.height || c.rowspan || c.rowSpan || (c.type === 'divider' ? 1 : c.type === 'subheader' ? 1 : c.type === 'header' || c.type === 'title' || c.type === 'section' ? 2 : c.type === 'kpi' || c.type === 'stat' ? 3 : 6);
                     if (c.type === 'divider') { c.w = 4; c.h = 1; }
                     if (c.type === 'title') { c.w = 4; c.h = c.h || 2; }
-                    if (c.type === 'header') { c.w = 4; c.h = c.h || 2; }
+                    if (c.type === 'header') { c.w = 4; c.h = c.h || 1; }
                     if (c.type === 'subheader') { c.w = 4; c.h = c.h || 1; }
                     if (c.type === 'section') { c.w = 4; c.h = c.h || 2; }
                     return c;
@@ -281,7 +282,7 @@ function dashboardBuilder() {
             } else if (c.type === 'header') {
                 h = '<div class="card-title">' + (c.title || '') + '</div>';
             } else if (c.type === 'subheader') {
-                h = '<div class="card-title">' + (c.title || '') + '</div>';
+                h = '<div class="card-subheader">' + (c.title || '') + '</div>';
             } else if (c.type === 'section') {
                 h = '<div class="card-title">' + (c.title || '') + '</div>';
             } else if (c.type === 'kpi' || c.type === 'stat') {
@@ -290,10 +291,11 @@ function dashboardBuilder() {
                 var ds = delta > 0 ? '+' : '';
                 var dc = delta > 0 ? 'up' : delta < 0 ? 'down' : '';
                 var cc = (c._data || {}).threshold || (val > 1000 ? 'green' : val > 500 ? 'amber' : 'red');
-                h = '<div class="card-label">' + (c.id || '') + '</div>' +
-                    '<div class="card-title">' + (c.title || '') + '</div>' +
-                    '<div class="stat-value ' + cc + '">' + (val ? (val >= 1000 ? (val/1000).toFixed(1) + 'K' : val.toLocaleString()) : '\u2014') + '</div>' +
-                    (delta !== 0 ? '<div class="stat-delta ' + dc + '">' + ds + delta + '% vs prior</div>' : '');
+                var alignStyle = ((c.viz_config || {}).align === 'center') ? ' style="text-align:center"' : '';
+                h = '<div class="card-label"' + alignStyle + '>' + (c.id || '') + '</div>' +
+                    '<div class="card-title"' + alignStyle + '>' + (c.title || '') + '</div>' +
+                    '<div class="stat-value ' + cc + '"' + alignStyle + '>' + (val ? (val >= 1000 ? (val/1000).toFixed(1) + 'K' : val.toLocaleString()) : '\u2014') + '</div>' +
+                    (delta !== 0 ? '<div class="stat-delta ' + dc + '"' + alignStyle + '>' + ds + delta + '% vs prior</div>' : '');
             } else if (['line','bar','donut','funnel','gauge','heatmap','pie','combo','scatter','area','radar'].indexOf(c.type) >= 0) {
                 h = '<div class="card-label">' + (c.id || '') + '</div>' +
                     '<div class="card-title">' + (c.title || '') + '</div>' +

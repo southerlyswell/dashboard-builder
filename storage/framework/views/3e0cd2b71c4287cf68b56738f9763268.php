@@ -18,7 +18,7 @@
     <div class="sidebar" x-ref="sidebar" x-show="chatVisible" :style="'width:' + sidebarWidth + 'px'" @mouseup="stopResize()" @mouseleave="stopResize()" @mousemove="doResize($event)">
         <div class="sidebar-resizer" @mousedown="startResize($event)" @dblclick="sidebarWidth = 420"></div>
         <div class="sidebar-header">
-            <h2>Dashboard Builder <span style="color:#64748b;font-size:11px;font-weight:400;">[rev 3]</span></h2>
+            <h2>Dashboard Builder <span style="color:#64748b;font-size:11px;font-weight:400;">[rev 4]</span></h2>
             <p>AI-powered, zero code</p>
             <select class="client-select" x-model="activeClient" @change="switchClient()">
                 <option value="">Select a client...</option>

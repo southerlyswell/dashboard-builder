@@ -213,6 +213,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .card-type-header .card-title { font-size: 15px; font-weight: 600; color: #FB923C; text-transform: uppercase; letter-spacing: 0.8px; }
 .card-type-subheader { padding: 6px 14px; background: transparent; border: none; }
 .card-type-subheader .card-title { font-size: 12px; font-weight: 500; color: #64748b; }
+.card-type-subheader .card-subheader { font-size: 12px; font-weight: 500; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
 .card-type-section { padding: 8px 14px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; }
 .card-type-section .card-title { font-size: 14px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
 .card-type-divider { padding: 0; background: transparent; border: none; border-radius: 0; display: flex; align-items: center; }
