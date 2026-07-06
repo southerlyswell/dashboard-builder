@@ -11,16 +11,22 @@ class DashboardAIService
     private string $apiKey;
     private string $baseUrl;
     private string $model;
+    private int $maxFunctionTurns = 5;
+    private string $sandboxDir;
 
     public function __construct()
     {
         $this->apiKey = env('DEEPSEEK_API_KEY') ?: config('deepseek.api_key', 'sk-30e904fa1cbc4ec5aac6f2d8c8e49a73');
         $this->baseUrl = config('deepseek.base_url', 'https://api.deepseek.com');
         $this->model = config('deepseek.model', 'deepseek-chat');
+        $this->sandboxDir = storage_path('ai');
+        if (!is_dir($this->sandboxDir)) {
+            @mkdir($this->sandboxDir, 0755, true);
+        }
     }
 
     /**
-     * Quick connectivity check — no auth needed, minimal cost.
+     * Quick connectivity check.
      */
     public function ping(): array
     {
@@ -45,40 +51,71 @@ class DashboardAIService
     }
 
     /**
-     * Chat with the AI — used for the consultant chat panel.
+     * Chat with the AI — supports function calling for file read/write.
      */
     public function chat(string $message, array $context = [], ?int $clientId = null): array
     {
         $client = $clientId ? Client::find($clientId) : null;
-        
+
         $systemPrompt = $this->buildSystemPrompt($client);
         $messages = $this->buildMessages($systemPrompt, $message, $context);
 
-        try {
-            $response = Http::timeout(120)
-                ->withToken($this->apiKey)
-                ->post("{$this->baseUrl}/v1/chat/completions", [
-                'model' => $this->model,
-                'messages' => $messages,
-                'temperature' => 0.3,
-                'max_tokens' => 4096,
-            ]);
+        $turns = 0;
 
-            if ($response->successful()) {
+        while ($turns < $this->maxFunctionTurns) {
+            $turns++;
+
+            try {
+                $response = Http::timeout(120)
+                    ->withToken($this->apiKey)
+                    ->post("{$this->baseUrl}/v1/chat/completions", [
+                        'model' => $this->model,
+                        'messages' => $messages,
+                        'temperature' => 0.3,
+                        'max_tokens' => 4096,
+                        'tools' => $this->getFunctionDefinitions(),
+                        'tool_choice' => 'auto',
+                    ]);
+
+                if (!$response->successful()) {
+                    Log::error('DeepSeek API error', ['status' => $response->status(), 'body' => $response->body()]);
+                    return ['role' => 'assistant', 'content' => 'AI service unavailable. Please try again.'];
+                }
+
                 $data = $response->json();
-                return [
-                    'role' => 'assistant',
-                    'content' => $data['choices'][0]['message']['content'] ?? 'No response',
-                    'usage' => $data['usage'] ?? null,
-                ];
-            }
+                $choice = $data['choices'][0]['message'] ?? [];
+                $content = $choice['content'] ?? '';
+                $toolCalls = $choice['tool_calls'] ?? [];
 
-            Log::error('DeepSeek API error', ['status' => $response->status(), 'body' => $response->body()]);
-            return ['role' => 'assistant', 'content' => 'AI service unavailable. Please try again.'];
-        } catch (\Exception $e) {
-            Log::error('DeepSeek API exception', ['error' => $e->getMessage()]);
-            return ['role' => 'assistant', 'content' => 'Connection error. Please check your API key and try again.'];
+                // Normal text response — no function calls
+                if (empty($toolCalls)) {
+                    return [
+                        'role' => 'assistant',
+                        'content' => $content ?: 'No response',
+                        'usage' => $data['usage'] ?? null,
+                    ];
+                }
+
+                // Process all tool calls
+                $messages[] = $choice; // assistant message with tool_calls
+
+                foreach ($toolCalls as $tc) {
+                    $result = $this->executeFunctionCall($tc);
+                    $messages[] = [
+                        'role' => 'tool',
+                        'tool_call_id' => $tc['id'],
+                        'content' => $result,
+                    ];
+                }
+
+                // Continue loop — send results back to AI
+            } catch (\Exception $e) {
+                Log::error('DeepSeek API exception', ['error' => $e->getMessage()]);
+                return ['role' => 'assistant', 'content' => 'Connection error. Please check your API key and try again.'];
+            }
         }
+
+        return ['role' => 'assistant', 'content' => 'I ran into a processing loop. Please try again with a simpler request.'];
     }
 
     /**
@@ -213,8 +250,7 @@ Rules:
 PROMPT;
 
         $response = $this->chat($userMessage, [], $client?->id);
-        
-        // Extract JSON from response
+
         $content = $response['content'] ?? '';
         $json = $this->extractJson($content);
 
@@ -222,7 +258,6 @@ PROMPT;
             return ['success' => true, 'dashboard' => $json];
         }
 
-        // Fallback: return a basic dashboard template if AI returned non-JSON
         return [
             'success' => false,
             'raw_response' => $content,
@@ -230,18 +265,230 @@ PROMPT;
         ];
     }
 
-    /**
-     * Extract JSON from AI response (handles markdown code blocks).
-     */
+    // ========================================================================
+    //  PRIVATE — System Prompt
+    // ========================================================================
+
+    private function buildSystemPrompt(?Client $client): string
+    {
+        // Load soul.md (personality + conversation rules)
+        $soulPath = $this->sandboxDir . '/soul.md';
+        $prompt = file_exists($soulPath)
+            ? file_get_contents($soulPath)
+            : "You are a knowledgeable AI dashboard assistant. You help users understand their data and build interactive dashboards.";
+
+        $prompt .= "\n\n";
+
+        // Load rules.md (dashboard structure + formatting rules)
+        $rulesPath = $this->sandboxDir . '/rules.md';
+        if (file_exists($rulesPath)) {
+            $prompt .= file_get_contents($rulesPath);
+        }
+
+        $prompt .= "\n\n";
+
+        // Dynamic parts — always generated by PHP
+        if ($client && $client->schema_snapshot) {
+            $schema = $client->schema_snapshot;
+            $tables = array_keys($schema);
+            $prompt .= "Current client database: {$client->name}\n";
+            $prompt .= "Tables: " . implode(', ', $tables) . "\n";
+            foreach ($schema as $table => $info) {
+                $cols = collect($info['columns'])->pluck('name')->implode(', ');
+                $prompt .= "  {$table} ({$info['row_count']} rows): {$cols}\n";
+            }
+        }
+
+        return $prompt;
+    }
+
+    // ========================================================================
+    //  PRIVATE — Function Calling (AI File Tools)
+    // ========================================================================
+
+    private function getFunctionDefinitions(): array
+    {
+        return [
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'read_file',
+                    'description' => 'Read the contents of a file from the AI storage directory. Use this to show saved notes, view soul.md or rules.md, or read any markdown file.',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'path' => [
+                                'type' => 'string',
+                                'description' => 'Relative path within storage/ai/, e.g. \'soul.md\' or \'notes.md\' or \'dashboard-notes/edutech.md\'',
+                            ],
+                        ],
+                        'required' => ['path'],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'write_file',
+                    'description' => 'Create or overwrite a file in the AI storage directory. Use this to save notes, memos, dashboard comments, or create new markdown files.',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'path' => [
+                                'type' => 'string',
+                                'description' => 'Relative path within storage/ai/, e.g. \'notes.md\' or \'dashboard-notes/edutech.md\'',
+                            ],
+                            'content' => [
+                                'type' => 'string',
+                                'description' => 'File content to write — full markdown text',
+                            ],
+                        ],
+                        'required' => ['path', 'content'],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'list_files',
+                    'description' => 'List all files in the AI storage directory. Use this to see what notes and documents exist.',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => (object)[],
+                        'required' => [],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    private function executeFunctionCall(array $toolCall): string
+    {
+        $id = $toolCall['id'] ?? 'unknown';
+        $name = $toolCall['function']['name'] ?? '';
+        $args = json_decode($toolCall['function']['arguments'] ?? '{}', true);
+
+        Log::info('AI function call', ['id' => $id, 'name' => $name, 'args' => $args]);
+
+        return match ($name) {
+            'read_file' => $this->readFile($args['path'] ?? ''),
+            'write_file' => $this->writeFile($args['path'] ?? '', $args['content'] ?? ''),
+            'list_files' => $this->listFiles(),
+            default => json_encode(['error' => "Unknown function: $name"]),
+        };
+    }
+
+    private function readFile(string $path): string
+    {
+        $fullPath = $this->resolvePath($path);
+        if (!$fullPath) {
+            return json_encode(['error' => 'Invalid or blocked file path. Only files within storage/ai/ are accessible.']);
+        }
+        if (!file_exists($fullPath)) {
+            return json_encode(['error' => "File not found: $path"]);
+        }
+
+        $content = file_get_contents($fullPath);
+        $size = strlen($content);
+
+        if ($size > 100000) {
+            $content = substr($content, 0, 100000) . "\n\n--- [file truncated at 100KB] ---";
+        }
+
+        return json_encode([
+            'path' => $path,
+            'size' => $size,
+            'content' => $content,
+        ]);
+    }
+
+    private function writeFile(string $path, string $content): string
+    {
+        $fullPath = $this->resolvePath($path);
+        if (!$fullPath) {
+            return json_encode(['error' => 'Invalid or blocked file path. Only files within storage/ai/ are accessible.']);
+        }
+
+        $dir = dirname($fullPath);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+
+        file_put_contents($fullPath, $content);
+        Log::info('AI wrote file', ['path' => $path, 'size' => strlen($content)]);
+
+        return json_encode(['success' => true, 'path' => $path, 'size' => strlen($content)]);
+    }
+
+    private function listFiles(): string
+    {
+        $files = [];
+        if (!is_dir($this->sandboxDir)) {
+            return json_encode(['files' => []]);
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->sandboxDir, \RecursiveDirectoryIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $relativePath = str_replace(
+                    str_replace('\\', '/', $this->sandboxDir) . '/',
+                    '',
+                    str_replace('\\', '/', $file->getPathname())
+                );
+                $files[] = [
+                    'path' => $relativePath,
+                    'size' => $file->getSize(),
+                    'modified' => date('Y-m-d H:i', $file->getMTime()),
+                ];
+            }
+        }
+
+        return json_encode(['files' => $files]);
+    }
+
+    private function resolvePath(string $path): ?string
+    {
+        // Normalize separators
+        $path = str_replace('\\', '/', $path);
+        // Remove directory traversal attempts
+        $path = preg_replace('/\.\.\//', '', $path);
+        $path = preg_replace('/\.\.\\\\/', '', $path);
+
+        $fullPath = realpath($this->sandboxDir . '/' . $path);
+
+        // Must exist and be within sandbox
+        if ($fullPath === false) {
+            // File may not exist yet (new write) — check parent dir
+            $parentDir = realpath(dirname($this->sandboxDir . '/' . $path));
+            if ($parentDir && str_starts_with(str_replace('\\', '/', $parentDir), str_replace('\\', '/', $this->sandboxDir))) {
+                return str_replace('\\', '/', $this->sandboxDir . '/' . $path);
+            }
+            return null;
+        }
+
+        $fullPath = str_replace('\\', '/', $fullPath);
+        $sandbox = str_replace('\\', '/', $this->sandboxDir);
+
+        if (!str_starts_with($fullPath, $sandbox)) {
+            return null;
+        }
+
+        return $fullPath;
+    }
+
+    // ========================================================================
+    //  PRIVATE — Utilities
+    // ========================================================================
+
     private function extractJson(string $content): ?array
     {
-        // Try direct parse
         $decoded = json_decode($content, true);
         if ($decoded && isset($decoded['cards'])) {
             return $decoded;
         }
 
-        // Try extracting from code block
         if (preg_match('/```(?:json)?\s*([\s\S]*?)\s*```/', $content, $matches)) {
             $decoded = json_decode($matches[1], true);
             if ($decoded && isset($decoded['cards'])) {
@@ -252,9 +499,6 @@ PROMPT;
         return null;
     }
 
-    /**
-     * Fallback dashboard template when AI fails.
-     */
     private function fallbackDashboard(): array
     {
         return [
@@ -266,86 +510,19 @@ PROMPT;
                 ['id' => 'BAR-2', 'type' => 'bar', 'title' => 'Overview', 'w' => 3, 'h' => 5,
                  'query' => 'SELECT 1 as x', 'viz_config' => []],
             ],
-            'filters' => [],
         ];
-    }
-
-    private function buildSystemPrompt(?Client $client): string
-    {
-        $prompt = "You are a knowledgeable AI dashboard assistant. You help users understand their data AND build interactive dashboards.
-
-";
-
-        $prompt .= "=== DUAL MODE ===\n";
-        $prompt .= "You operate in two modes:\n";
-        $prompt .= "1. CONVERSATION — When the user asks a question, explores data, or wants to understand something about their database. Answer naturally. Be helpful and informative.\n";
-        $prompt .= "2. DASHBOARD — When the user asks you to create, build, generate, modify, add to, or update a dashboard. Output the dashboard JSON in a code block.\n\n";
-        $prompt .= "HOW TO CHOOSE:\n";
-        $prompt .= "- Questions about tables, columns, data, the platform, or anything informational → CONVERSATION mode. Answer in plain text.\n";
-        $prompt .= "- 'Show me...', 'What is...', 'How many...', 'Tell me about...', 'Display the fields...' → CONVERSATION mode.\n";
-        $prompt .= "- 'Build a dashboard', 'Create a chart', 'Add a KPI', 'Make a table showing...', 'Generate a dashboard for...' → DASHBOARD mode.\n";
-        $prompt .= "- If unsure, briefly answer the question in CONVERSATION mode first, then ask if they'd like a dashboard.\n\n";
-        $prompt .= "=== CONVERSATION RULES ===\n";
-        $prompt .= "- Use the schema information provided below to answer questions about tables, columns, and data.\n";
-        $prompt .= "- Be concise. One or two sentences is often enough.\n";
-        $prompt .= "- If the user asks about something not in the schema, say you don't have that data.\n";
-        $prompt .= "- After answering, you may offer to build a relevant dashboard: 'Would you like me to build a dashboard for this?'\n\n";
-
-        // Layout framework — the AI must follow this structure to avoid "shotgun" dashboards
-        $prompt .= "=== DASHBOARD STRUCTURE (follow exactly when building dashboards) ===\n";
-        $prompt .= "  Card rows:\n";
-        $prompt .= "  Row 1: Title card (type=title, w=4, h=2)\n";
-        $prompt .= "  Row 2: 3-4 KPI cards (type=kpi, w=1 each, h=3) — pick the 3-4 MOST IMPORTANT metrics\n";
-        $prompt .= "  Row 3: Divider (type=divider, w=4, h=1)\n";
-        $prompt .= "  Row 4: Section header (type=header, w=4, h=2) — like 'Performance Overview'\n";
-        $prompt .= "  Row 5: 1 trend chart (type=line or type=bar, w=4, h=6) — main insight\n";
-        $prompt .= "  Row 6: Subheader (type=subheader, w=4, h=1) — REQUIRED, like 'Breakdown by category'\n";
-        $prompt .= "  Row 7: 1-2 supporting charts (type=donut/pie or type=bar, w=2 each, h=5)\n";
-        $prompt .= "  Row 8: Divider (type=divider, w=4, h=1)\n";
-        $prompt .= "  Row 9: Section header (type=header, w=4, h=2) — like 'Details'\n";
-        $prompt .= "  Row 10: 1 table (type=table, w=4, h=6) — recent records or detailed view\n\n";
-
-        $prompt .= "=== DASHBOARD RULES ===\n";
-        $prompt .= "- MAX 12 cards total. Less is more. A dashboard with 6 focused cards is better than 15 scattered ones.\n";
-        $prompt .= "- Every KPI must answer a business question. Don't show 'total rows in table' — show 'active beneficiaries (30d)' or 'enrollment rate %'.\n";
-        $prompt .= "- Pick metrics that tell a story together: KPI row → trend → breakdown.\n";
-        $prompt .= "- Chart type matching: trend over time = line, category comparison = bar, part-to-whole = donut.\n";
-        $prompt .= "- 4-column grid. w (1-4) for width, h (1-8) for height (50px per unit).\n";
-        $prompt .= "- Real MySQL queries only. Use CURDATE(), DATE_SUB(), real table and column names from the schema below.\n";
-        $prompt .= "\nDASHBOARD INTEGRITY (CRITICAL):\n";
-        $prompt .= "- When modifying an existing dashboard: ADD new cards to the BOTTOM, never reposition existing cards unless the user explicitly asks you to move something.\n";
-        $prompt .= "- When adding a card, return the FULL dashboard JSON with all existing cards PLUS the new card at the bottom.\n";
-        $prompt .= "- Never change the ID, type, title, query, or position of any existing card unless explicitly asked.\n";
-        $prompt .= "- If a user says 'add X', ADD it. If they say 'change X to Y', change only that.\n";
-        $prompt .= "\nDASHBOARD OUTPUT FORMAT:\n";
-        $prompt .= "- When in DASHBOARD mode, output ONLY the JSON in a ```json code block.\n";
-        $prompt .= "- You MAY include ONE short conversational line before the JSON to acknowledge the request, like 'Here's your dashboard:' or 'I've added the KPI:'\n";
-        $prompt .= "- JSON FORMAT:\n```json\n{\"dashboard\":{\"title\":\"Dashboard Title\",\"theme\":\"dark\",\"cards\":[{\"id\":\"title-1\",\"type\":\"title\",\"title\":\"Dashboard Title\",\"w\":4,\"h\":2},{\"id\":\"kpi-1\",\"type\":\"kpi\",\"title\":\"Metric Name\",\"w\":1,\"h\":3,\"query\":\"SELECT ...\"}]}}\n```\n\n";
-
-        if ($client && $client->schema_snapshot) {
-            $schema = $client->schema_snapshot;
-            $tables = array_keys($schema);
-            $prompt .= "\nCurrent client database: {$client->name}\n";
-            $prompt .= "Tables: " . implode(', ', $tables) . "\n";
-            foreach ($schema as $table => $info) {
-                $cols = collect($info['columns'])->pluck('name')->implode(', ');
-                $prompt .= "  {$table} ({$info['row_count']} rows): {$cols}\n";
-            }
-        }
-
-        return $prompt;
     }
 
     private function buildMessages(string $systemPrompt, string $userMessage, array $context): array
     {
         $messages = [['role' => 'system', 'content' => $systemPrompt]];
-        
+
         foreach ($context as $msg) {
             $messages[] = ['role' => $msg['role'] ?? 'user', 'content' => $msg['content'] ?? ''];
         }
-        
+
         $messages[] = ['role' => 'user', 'content' => $userMessage];
-        
+
         return $messages;
     }
 }
