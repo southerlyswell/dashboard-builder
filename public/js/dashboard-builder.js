@@ -29,6 +29,8 @@ function dashboardBuilder() {
         publicUrl: '',
         jsonError: '',
         revisionInfo: '',
+        sidebarWidth: 420,
+        sidebarResizing: false,
         modalDrag: false,
         modalX: 0,
         modalY: 0,
@@ -39,6 +41,8 @@ function dashboardBuilder() {
 
         // ===== Lifecycle =====
         init() {
+            var self = this;
+            document.addEventListener('mouseup', function() { self.stopResize(); });
             this.checkAI();
             this.checkProjectLoad();
         },
@@ -732,6 +736,24 @@ function dashboardBuilder() {
         },
         stopModalDrag() {
             this.modalDrag = false;
+        },
+
+        // ===== Sidebar Resize =====
+        startResize(e) {
+            this.sidebarResizing = true;
+            this.sidebarStartX = e.clientX;
+            this.sidebarStartWidth = this.sidebarWidth;
+            e.preventDefault();
+        },
+        doResize(e) {
+            if (!this.sidebarResizing) return;
+            var newWidth = this.sidebarStartWidth + (e.clientX - this.sidebarStartX);
+            if (newWidth < 280) newWidth = 280;
+            if (newWidth > 700) newWidth = 700;
+            this.sidebarWidth = newWidth;
+        },
+        stopResize() {
+            this.sidebarResizing = false;
         }
     };
 }
