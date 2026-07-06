@@ -109,8 +109,13 @@ function dashboardBuilder() {
                     })
                 });
                 const data = await resp.json();
-                this.messages.push({ id: this.msgId++, role: 'assistant', content: data.content || 'No response' });
-                this.tryParseDashboard(data.content);
+                if (data._render_dashboard) {
+                    this.tryParseDashboard(JSON.stringify(data._render_dashboard));
+                    this.messages.push({ id: this.msgId++, role: 'assistant', content: data.content || 'Dashboard rendered!' });
+                } else {
+                    this.messages.push({ id: this.msgId++, role: 'assistant', content: data.content || 'No response' });
+                    this.tryParseDashboard(data.content);
+                }
             } catch (e) {
                 this.messages.push({ id: this.msgId++, role: 'assistant', content: 'Connection error. Please try again.' });
             }

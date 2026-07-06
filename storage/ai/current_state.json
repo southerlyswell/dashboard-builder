@@ -1,0 +1,148 @@
+{
+  "version": "2026.7.6",
+  "last_updated": "2026-07-06T18:00:00Z",
+  "name": "Management Overview Dashboard",
+  "theme": "Management",
+  "layout": {
+    "rows": 3,
+    "columns": 4
+  },
+  "components": [
+    /* NEW KPI: Total People */
+    {
+      "id": "kpi_total_people",
+      "type": "kpi",
+      "title": "Total People",
+      "position": { "row": 0, "col": 0, "width": 1, "height": 1 },
+      "data_source": {
+        "table": "persons",
+        "fields": ["id"],
+        "filter": null
+      },
+      "visual": {
+        "color": "#4F46E5",
+        "icon": "users",
+        "chart_type": null
+      }
+    },
+    /* NEW KPI: Active Projects */
+    {
+      "id": "kpi_active_projects",
+      "type": "kpi",
+      "title": "Active Projects",
+      "position": { "row": 0, "col": 1, "width": 1, "height": 1 },
+      "data_source": {
+        "table": "projects",
+        "fields": ["id"],
+        "filter": "status = 'active'"
+      },
+      "visual": {
+        "color": "#059669",
+        "icon": "folder-tree",
+        "chart_type": null
+      }
+    },
+    /* NEW KPI: Staff Members */
+    {
+      "id": "kpi_staff_members",
+      "type": "kpi",
+      "title": "Staff Members",
+      "position": { "row": 0, "col": 2, "width": 1, "height": 1 },
+      "data_source": {
+        "table": "staff",
+        "fields": ["id"],
+        "filter": null
+      },
+      "visual": {
+        "color": "#D97706",
+        "icon": "badge-check",
+        "chart_type": null
+      }
+    },
+    /* NEW KPI: Branches */
+    {
+      "id": "kpi_branches",
+      "type": "kpi",
+      "title": "Branches",
+      "position": { "row": 0, "col": 3, "width": 1, "height": 1 },
+      "data_source": {
+        "table": "branches",
+        "fields": ["id"],
+        "filter": null
+      },
+      "visual": {
+        "color": "#DC2626",
+        "icon": "building",
+        "chart_type": null
+      }
+    },
+    /* NEW Chart: Persons by Branch (Bar) */
+    {
+      "id": "chart_persons_by_branch",
+      "type": "chart",
+      "title": "Persons by Branch",
+      "position": { "row": 1, "col": 0, "width": 2, "height": 1 },
+      "data_source": {
+        "table": "persons",
+        "fields": ["branch_id"],
+        "filter": null
+      },
+      "visual": {
+        "color": "#4F46E5",
+        "icon": null,
+        "chart_type": "bar"
+      }
+    },
+    /* NEW Chart: Attendance Trend (Line) */
+    {
+      "id": "chart_attendance_trend",
+      "type": "chart",
+      "title": "Attendance Trend",
+      "position": { "row": 1, "col": 2, "width": 2, "height": 1 },
+      "data_source": {
+        "table": "attendance",
+        "fields": ["date", "id"],
+        "filter": null
+      },
+      "visual": {
+        "color": "#059669",
+        "icon": null,
+        "chart_type": "line"
+      }
+    },
+    /* NEW Chart: Project Assignments (Pie) */
+    {
+      "id": "chart_project_assignments",
+      "type": "chart",
+      "title": "Project Assignments",
+      "position": { "row": 2, "col": 0, "width": 2, "height": 1 },
+      "data_source": {
+        "table": "person_projects",
+        "fields": ["project_id"],
+        "filter": null
+      },
+      "visual": {
+        "color": "#8B5CF6",
+        "icon": null,
+        "chart_type": "pie"
+      }
+    },
+    /* NEW Table: Branch Overview */
+    {
+      "id": "table_branch_overview",
+      "type": "table",
+      "title": "Branch Overview",
+      "position": { "row": 2, "col": 2, "width": 2, "height": 1 },
+      "data_source": {
+        "table": "branches",
+        "fields": ["id", "name", "location", "status"],
+        "filter": null
+      },
+      "visual": {
+        "color": "#1F2937",
+        "icon": null,
+        "chart_type": null
+      }
+    }
+  ]
+}

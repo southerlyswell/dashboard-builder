@@ -13,6 +13,7 @@ class DashboardAIService
     private string $model;
     private int $maxFunctionTurns = 5;
     private string $sandboxDir;
+    private ?array $pendingDashboard = null;
 
     public function __construct()
     {
@@ -89,11 +90,16 @@ class DashboardAIService
 
                 // Normal text response — no function calls
                 if (empty($toolCalls)) {
-                    return [
+                    $response = [
                         'role' => 'assistant',
                         'content' => $content ?: 'No response',
                         'usage' => $data['usage'] ?? null,
                     ];
+                    if ($this->pendingDashboard) {
+                        $response['_render_dashboard'] = $this->pendingDashboard;
+                        $this->pendingDashboard = null;
+                    }
+                    return $response;
                 }
 
                 // Process all tool calls
@@ -351,11 +357,59 @@ PROMPT;
                 'type' => 'function',
                 'function' => [
                     'name' => 'list_files',
-                    'description' => 'List all files in the AI storage directory. Use this to see what notes and documents exist.',
+                    'description' => 'List all files in the AI storage directory.',
                     'parameters' => [
                         'type' => 'object',
                         'properties' => (object)[],
                         'required' => [],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'render_dashboard',
+                    'description' => 'Call this when you have a complete dashboard JSON ready. It renders the dashboard on the canvas immediately. NEVER save dashboard JSON to a file — always use this function.',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'dashboard_title' => [
+                                'type' => 'string',
+                                'description' => 'Dashboard title shown on the canvas',
+                            ],
+                            'cards' => [
+                                'type' => 'array',
+                                'description' => 'Array of card objects. Each card has: id, type (title/kpi/line/bar/donut/table/divider/header/subheader), title, w (1-4 width), h (1-8 height), query (MySQL for data cards), viz_config (optional).
+
+IMPORTANT LAYOUT PATTERN:
+- Row 0: Title (type=title, w=4, h=2)
+- Row 1: 4 KPI cards (type=kpi, w=1 each, h=3)
+- Row 2: Divider (type=divider, w=4, h=1)
+- Row 3: Section header (type=header, w=4, h=2) like "Performance Overview"
+- Row 4: Main trend chart full width (type=line/bar, w=4, h=6)
+- Row 5: Subheader (type=subheader, w=4, h=1)
+- Row 6: 2 breakdown charts (type=donut/bar, w=2 each, h=5)
+- Row 7: Divider (type=divider, w=4, h=1)
+- Row 8: Section header (type=header, w=4, h=2)
+- Row 9: Detail table (type=table, w=4, h=6)
+
+Every dashboard needs: title, 3-4 KPIs, 2 dividers, 2 headers, 1 subheader, 1 line/bar chart, 1 donut, 1 table.',
+                                'items' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'id' => ['type' => 'string'],
+                                        'type' => ['type' => 'string', 'enum' => ['title', 'kpi', 'line', 'bar', 'donut', 'table', 'divider', 'header', 'subheader']],
+                                        'title' => ['type' => 'string'],
+                                        'w' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 4],
+                                        'h' => ['type' => 'integer', 'minimum' => 1, 'maximum' => 8],
+                                        'query' => ['type' => 'string'],
+                                        'viz_config' => ['type' => 'object'],
+                                    ],
+                                    'required' => ['id', 'type', 'title', 'w', 'h'],
+                                ],
+                            ],
+                        ],
+                        'required' => ['dashboard_title', 'cards'],
                     ],
                 ],
             ],
@@ -374,6 +428,7 @@ PROMPT;
             'read_file' => $this->readFile($args['path'] ?? ''),
             'write_file' => $this->writeFile($args['path'] ?? '', $args['content'] ?? ''),
             'list_files' => $this->listFiles(),
+            'render_dashboard' => $this->renderDashboard($args),
             default => json_encode(['error' => "Unknown function: $name"]),
         };
     }
@@ -446,6 +501,28 @@ PROMPT;
         }
 
         return json_encode(['files' => $files]);
+    }
+
+    private function renderDashboard(array $args): string
+    {
+        $title = $args['dashboard_title'] ?? 'Dashboard';
+        $cards = $args['cards'] ?? [];
+
+        if (empty($cards)) {
+            return json_encode(['error' => 'Dashboard must have at least one card']);
+        }
+
+        $dashboard = [
+            'title' => $title,
+            'theme' => 'dark',
+            'cards' => $cards,
+        ];
+
+        $this->pendingDashboard = $dashboard;
+
+        Log::info('AI rendered dashboard', ['title' => $title, 'card_count' => count($cards)]);
+
+        return json_encode(['success' => true, 'dashboard_title' => $title, 'card_count' => count($cards)]);
     }
 
     private function resolvePath(string $path): ?string
