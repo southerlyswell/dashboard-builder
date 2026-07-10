@@ -11,7 +11,7 @@ class DashboardAIService
     private string $apiKey;
     private string $baseUrl;
     private string $model;
-    private int $maxFunctionTurns = 5;
+    private int $maxFunctionTurns = 15;
     private string $sandboxDir;
     private ?array $pendingDashboard = null;
 

@@ -1,0 +1,175 @@
+{
+    "title": "Test Dashboard",
+    "theme": "dark",
+    "cards": [
+        {
+            "id": "title-1",
+            "type": "title",
+            "title": "Test Dashboard",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 0
+        },
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "Total Persons",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM persons",
+            "col": 0,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 2776,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        2776
+                    ]
+                ],
+                "card_id": "kpi-1"
+            }
+        },
+        {
+            "id": "kpi-2",
+            "type": "kpi",
+            "title": "Total Staff",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM staff",
+            "col": 1,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 30,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        30
+                    ]
+                ],
+                "card_id": "kpi-2"
+            }
+        },
+        {
+            "id": "kpi-3",
+            "type": "kpi",
+            "title": "Projects",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM projects",
+            "col": 2,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 87,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        87
+                    ]
+                ],
+                "card_id": "kpi-3"
+            }
+        },
+        {
+            "id": "kpi-4",
+            "type": "kpi",
+            "title": "Branches",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM branches",
+            "col": 3,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 16,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        16
+                    ]
+                ],
+                "card_id": "kpi-4"
+            }
+        },
+        {
+            "id": "div-1",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 5
+        },
+        {
+            "id": "hdr-1",
+            "type": "header",
+            "title": "Attendance Trends",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 6
+        },
+        {
+            "id": "line-1",
+            "type": "line",
+            "title": "Daily Attendance",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT DATE(date) as d, COUNT(*) as c FROM attendance GROUP BY DATE(date) ORDER BY d LIMIT 30",
+            "col": 0,
+            "row": 7,
+            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'date' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: englishf_fms_demo, SQL: SELECT DATE(date) as d, COUNT(*) as c FROM attendance GROUP BY DATE(date) ORDER BY d LIMIT 30)"
+        },
+        {
+            "id": "sub-1",
+            "type": "subheader",
+            "title": "Breakdowns",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 13
+        },
+        {
+            "id": "donut-1",
+            "type": "donut",
+            "title": "Persons by Branch",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT b.name as label, COUNT(*) as value FROM persons p JOIN branches b ON p.branch_id = b.id GROUP BY b.name ORDER BY value DESC LIMIT 8",
+            "col": 0,
+            "row": 14,
+            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'b.name' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: englishf_fms_demo, SQL: SELECT b.name as label, COUNT(*) as value FROM persons p JOIN branches b ON p.branch_id = b.id GROUP BY b.name ORDER BY value DESC LIMIT 8)"
+        },
+        {
+            "id": "bar-1",
+            "type": "bar",
+            "title": "Projects by Status",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT status, COUNT(*) as count FROM projects GROUP BY status ORDER BY count DESC",
+            "col": 2,
+            "row": 14,
+            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'status' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: englishf_fms_demo, SQL: SELECT status, COUNT(*) as count FROM projects GROUP BY status ORDER BY count DESC LIMIT 1000)"
+        }
+    ]
+}
