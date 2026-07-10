@@ -121,7 +121,12 @@ class DashboardAIService
             }
         }
 
-        return ['role' => 'assistant', 'content' => 'I ran into a processing loop. Please try again with a simpler request.'];
+        $response = ['role' => 'assistant', 'content' => 'I ran into a processing loop. Please try again with a simpler request.'];
+        if ($this->pendingDashboard) {
+            $response['_render_dashboard'] = $this->pendingDashboard;
+            $this->pendingDashboard = null;
+        }
+        return $response;
     }
 
     /**
