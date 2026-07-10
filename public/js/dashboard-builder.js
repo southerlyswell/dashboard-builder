@@ -121,8 +121,6 @@ function dashboardBuilder() {
                     })
                 });
                 const data = await resp.json();
-                console.log('AI RESPONSE:', JSON.stringify(data).substring(0, 500));
-                console.log('HAS _render_dashboard:', !!data._render_dashboard);
                 if (data._render_dashboard) {
                     this.tryParseDashboard(JSON.stringify(data._render_dashboard));
                     this.messages.push({ id: this.msgId++, role: 'assistant', content: data.content || 'Dashboard rendered!' });

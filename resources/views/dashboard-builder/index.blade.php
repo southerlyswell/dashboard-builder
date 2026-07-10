@@ -72,7 +72,6 @@
                 <span x-show="revisionInfo" style="color:#FB923C;font-size:11px;margin-left:8px;" x-text="revisionInfo"></span>
                 <button class="btn btn-outline" @click="toggleJSON()" x-show="dashboard && !showSchema" x-text="showJSONPanel ? 'Close JSON' : 'JSON'"></button>
                 <a class="btn btn-outline" href="/dashboard-builder/projects" style="text-decoration:none;">Projects</a>
-                <button class="btn btn-outline" @click="injectTestDashboard()" style="border-color:#FB923C;color:#FB923C;">Test Render</button>
                 <button class="btn-save" @click="saveDashboard()" :disabled="saveStatus === 'saving'" x-show="dashboard && !showSchema">
                     <span x-show="saveStatus !== 'saving' && saveStatus !== 'saved' && saveStatus !== 'error'">Save</span>
                     <span x-show="saveStatus === 'saving'">Saving...</span>
@@ -192,7 +191,7 @@
 
 </div>
 
-<script src="/js/dashboard-builder.js?v=20"></script>
+<script src="/js/dashboard-builder.js?v=21"></script>
 <script>window.ACFS_CONFIG = { clientId: '{{ $activeClient?->id }}' };</script>
 </body>
 </html>

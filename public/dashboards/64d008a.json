@@ -1,0 +1,73 @@
+{
+    "title": "Student & Attendance Overview",
+    "theme": "dark",
+    "cards": [
+        {
+            "id": "title-1",
+            "type": "title",
+            "title": "Student & Attendance Overview",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 0
+        },
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "Total Students",
+            "w": 2,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM persons",
+            "viz_config": {
+                "align": "center",
+                "color": "#3b82f6"
+            },
+            "col": 0,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 2776,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        2776
+                    ]
+                ],
+                "card_id": "kpi-1"
+            }
+        },
+        {
+            "id": "kpi-2",
+            "type": "kpi",
+            "title": "Total Attendance Records",
+            "w": 2,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM attendance",
+            "viz_config": {
+                "align": "center",
+                "color": "#f59e0b"
+            },
+            "col": 2,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 152363,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        152363
+                    ]
+                ],
+                "card_id": "kpi-2"
+            }
+        }
+    ]
+}
