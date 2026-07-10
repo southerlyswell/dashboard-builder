@@ -90,7 +90,7 @@
                 @if($dashboard->is_published)<span style="color:#4ade80;">&#9679; Embedded</span>@endif
             </div>
             <div class="db-card-actions">
-                <a href="/dashboard-builder?project={{ $dashboard->id }}">&#9998; Load &amp; Edit</a>
+                <a href="/dashboard-builder?client={{ $dashboard->client_id }}&project={{ $dashboard->id }}">&#9998; Load &amp; Edit</a>
                 <a href="/embed/{{ $dashboard->public_id }}" target="_blank">&#9679; View</a>
             </div>
         </div>
