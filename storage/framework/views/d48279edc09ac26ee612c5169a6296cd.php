@@ -1,4 +1,4 @@
-<?php $codeRev = 7; ?>
+<?php $codeRev = 9; ?>
 <!DOCTYPE html>
 <html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>

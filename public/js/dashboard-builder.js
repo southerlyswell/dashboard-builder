@@ -165,6 +165,7 @@ function dashboardBuilder() {
                 var brace = content.indexOf('{"dashboard"');
                 if (brace < 0) brace = content.indexOf('{"theme"');
                 if (brace < 0) brace = content.indexOf('{"cards"');
+                if (brace < 0) brace = content.indexOf('{"title"');
                 if (brace >= 0) {
                     var depth = 0, end = brace;
                     for (var i = brace; i < content.length; i++) {

@@ -1,0 +1,115 @@
+{
+    "cards": [
+        {
+            "h": 2,
+            "w": 4,
+            "id": "title-1",
+            "col": 0,
+            "row": 0,
+            "type": "title",
+            "title": "FMSystem Overview"
+        },
+        {
+            "h": 3,
+            "w": 1,
+            "id": "kpi-1",
+            "col": 0,
+            "row": 2,
+            "type": "kpi",
+            "_data": {
+                "rows": [
+                    [
+                        87
+                    ]
+                ],
+                "label": "value",
+                "value": 87,
+                "card_id": "kpi-1",
+                "columns": [
+                    "value"
+                ],
+                "row_count": 1
+            },
+            "query": "SELECT COUNT(*) AS value FROM projects",
+            "title": "# Projects",
+            "dataError": "Failed to load data. Client database may not be configured."
+        },
+        {
+            "h": 3,
+            "w": 1,
+            "id": "kpi-2",
+            "col": 1,
+            "row": 2,
+            "type": "kpi",
+            "_data": {
+                "rows": [
+                    [
+                        16
+                    ]
+                ],
+                "label": "value",
+                "value": 16,
+                "card_id": "kpi-2",
+                "columns": [
+                    "value"
+                ],
+                "row_count": 1
+            },
+            "query": "SELECT COUNT(*) AS value FROM branches",
+            "title": "# Branches",
+            "dataError": "Failed to load data. Client database may not be configured."
+        },
+        {
+            "h": 3,
+            "w": 1,
+            "id": "kpi-3",
+            "col": 2,
+            "row": 2,
+            "type": "kpi",
+            "_data": {
+                "rows": [
+                    [
+                        30
+                    ]
+                ],
+                "label": "value",
+                "value": 30,
+                "card_id": "kpi-3",
+                "columns": [
+                    "value"
+                ],
+                "row_count": 1
+            },
+            "query": "SELECT COUNT(*) AS value FROM staff",
+            "title": "# Staff",
+            "dataError": "Failed to load data. Client database may not be configured."
+        },
+        {
+            "h": 3,
+            "w": 2,
+            "id": "kpi-4",
+            "col": 0,
+            "row": 5,
+            "type": "kpi",
+            "_data": {
+                "rows": [
+                    [
+                        "1.9"
+                    ]
+                ],
+                "label": "value",
+                "value": "1.9",
+                "card_id": "kpi-4",
+                "columns": [
+                    "value"
+                ],
+                "row_count": 1
+            },
+            "query": "SELECT COALESCE(ROUND((SELECT COUNT(*) FROM staff) / NULLIF((SELECT COUNT(*) FROM branches), 0), 1), 0) AS value",
+            "title": "Avg Staff per Branch",
+            "dataError": "Failed to load data. Client database may not be configured."
+        }
+    ],
+    "theme": "dark",
+    "title": "FMSystem Overview"
+}

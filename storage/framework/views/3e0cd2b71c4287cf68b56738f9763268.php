@@ -18,7 +18,7 @@
     <div class="sidebar" x-ref="sidebar" x-show="chatVisible" :style="'width:' + sidebarWidth + 'px'" @mouseup="stopResize()" @mouseleave="stopResize()" @mousemove="doResize($event)">
         <div class="sidebar-resizer" @mousedown="startResize($event)" @dblclick="sidebarWidth = 420"></div>
         <div class="sidebar-header">
-            <h2>Dashboard Builder <span style="color:#64748b;font-size:11px;font-weight:400;">[rev 7]</span></h2>
+            <h2>Dashboard Builder <span style="color:#64748b;font-size:11px;font-weight:400;">[rev 9]</span></h2>
             <p>AI-powered, zero code</p>
             <select class="client-select" x-model="activeClient" @change="switchClient()">
                 <option value="">Select a client...</option>
@@ -73,6 +73,7 @@
                 <span x-show="revisionInfo" style="color:#FB923C;font-size:11px;margin-left:8px;" x-text="revisionInfo"></span>
                 <button class="btn btn-outline" @click="toggleJSON()" x-show="dashboard && !showSchema" x-text="showJSONPanel ? 'Close JSON' : 'JSON'"></button>
                 <a class="btn btn-outline" href="/dashboard-builder/projects" style="text-decoration:none;">Projects</a>
+                <button class="btn btn-outline" @click="injectTestDashboard()" style="border-color:#FB923C;color:#FB923C;">Test Render</button>
                 <button class="btn-save" @click="saveDashboard()" :disabled="saveStatus === 'saving'" x-show="dashboard && !showSchema">
                     <span x-show="saveStatus !== 'saving' && saveStatus !== 'saved' && saveStatus !== 'error'">Save</span>
                     <span x-show="saveStatus === 'saving'">Saving...</span>
@@ -86,10 +87,13 @@
             <!-- Schema view -->
             <div x-show="showSchema" class="schema-view">
                 <div x-show="schemaLoading" style="color:#FB923C;padding:20px;">Loading schema...</div>
-                <div x-show="!schemaLoading && schemaData && schemaData.error" style="color:#f87171;padding:20px;">
+                <template x-if="!schemaLoading && schemaData && schemaData.error">
+                <div style="color:#f87171;padding:20px;">
                     <strong>Unable to load schema:</strong> <span x-text="typeof schemaData.error === 'string' ? schemaData.error : 'Unknown error'"></span>
                 </div>
-                <div x-show="!schemaLoading && schemaData && schemaData.tables" style="padding:16px;overflow-y:auto;max-height:calc(100vh - 120px);">
+                </template>
+                <template x-if="!schemaLoading && schemaData && schemaData.tables">
+                <div style="padding:16px;overflow-y:auto;max-height:calc(100vh - 120px);">
                     <template x-for="table in schemaData.tables" :key="table.name">
                         <div style="margin-bottom:12px;background:#1e293b;border:1px solid #334155;border-radius:8px;overflow:hidden;">
                             <div style="padding:8px 14px;background:#334155;color:#FB923C;font-weight:600;font-size:13px;" x-text="table.name"></div>
@@ -101,6 +105,7 @@
                         </div>
                     </template>
                 </div>
+                </template>
                 <div x-show="!schemaLoading && !schemaData" style="color:#64748b;padding:20px;">Click "Schema" to view the client database structure.</div>
             </div>
 
@@ -188,7 +193,7 @@
 
 </div>
 
-<script src="/js/dashboard-builder.js?v=17"></script>
+<script src="/js/dashboard-builder.js?v=18"></script>
 <script>window.ACFS_CONFIG = { clientId: '<?php echo e($activeClient?->id); ?>' };</script>
 </body>
 </html>
