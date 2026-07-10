@@ -82,6 +82,18 @@ function dashboardBuilder() {
             this.aiChecking = false;
         },
 
+        // ===== Test Dashboard (no AI — raw render test) =====
+        injectTestDashboard() {
+            var testJson = '{"title":"Test Dashboard","theme":"dark","cards":[{"id":"title-1","type":"title","title":"Test Dashboard","w":4,"h":2},{"id":"kpi-1","type":"kpi","title":"Total Persons","w":1,"h":3,"query":"SELECT COUNT(*) as value FROM persons"},{"id":"kpi-2","type":"kpi","title":"Total Staff","w":1,"h":3,"query":"SELECT COUNT(*) as value FROM staff"},{"id":"kpi-3","type":"kpi","title":"Projects","w":1,"h":3,"query":"SELECT COUNT(*) as value FROM projects"},{"id":"kpi-4","type":"kpi","title":"Branches","w":1,"h":3,"query":"SELECT COUNT(*) as value FROM branches"},{"id":"div-1","type":"divider","title":"","w":4,"h":1},{"id":"hdr-1","type":"header","title":"Attendance Trends","w":4,"h":1},{"id":"line-1","type":"line","title":"Daily Attendance","w":4,"h":6,"query":"SELECT DATE(date) as d, COUNT(*) as c FROM attendance GROUP BY DATE(date) ORDER BY d LIMIT 30"},{"id":"sub-1","type":"subheader","title":"Breakdowns","w":4,"h":1},{"id":"donut-1","type":"donut","title":"Persons by Branch","w":2,"h":5,"query":"SELECT b.name as label, COUNT(*) as value FROM persons p JOIN branches b ON p.branch_id = b.id GROUP BY b.name ORDER BY value DESC LIMIT 8"},{"id":"bar-1","type":"bar","title":"Projects by Status","w":2,"h":5,"query":"SELECT status, COUNT(*) as count FROM projects GROUP BY status ORDER BY count DESC"}]}';
+            console.log('INJECT TEST: calling tryParseDashboard');
+            this.tryParseDashboard(testJson);
+            console.log('INJECT TEST: tryParseDashboard returned');
+            console.log('INJECT TEST: dashboard is', this.dashboard ? 'SET (' + this.dashboard.cards.length + ' cards)' : 'NULL');
+            this.$nextTick(function() {
+                console.log('INJECT TEST: renderGrid called');
+            });
+        },
+
         // ===== Chat =====
         async sendMessage() {
             const msg = this.chatInput.trim();

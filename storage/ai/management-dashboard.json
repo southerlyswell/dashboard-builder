@@ -1,0 +1,126 @@
+{
+  "dashboard_title": "Management Overview",
+  "cards": [
+    {
+      "id": "title-1",
+      "type": "title",
+      "title": "Management Overview",
+      "w": 4,
+      "h": 2
+    },
+    {
+      "id": "kpi-1",
+      "type": "kpi",
+      "title": "Total Persons",
+      "w": 1,
+      "h": 3,
+      "query": "SELECT COUNT(*) as value FROM persons"
+    },
+    {
+      "id": "kpi-2",
+      "type": "kpi",
+      "title": "Total Projects",
+      "w": 1,
+      "h": 3,
+      "query": "SELECT COUNT(*) as value FROM projects"
+    },
+    {
+      "id": "kpi-3",
+      "type": "kpi",
+      "title": "Total Staff",
+      "w": 1,
+      "h": 3,
+      "query": "SELECT COUNT(*) as value FROM staff"
+    },
+    {
+      "id": "kpi-4",
+      "type": "kpi",
+      "title": "Total Branches",
+      "w": 1,
+      "h": 3,
+      "query": "SELECT COUNT(*) as value FROM branches"
+    },
+    {
+      "id": "divider-1",
+      "type": "divider",
+      "title": "",
+      "w": 4,
+      "h": 1
+    },
+    {
+      "id": "header-1",
+      "type": "header",
+      "title": "Performance Overview",
+      "w": 4,
+      "h": 1
+    },
+    {
+      "id": "line-1",
+      "type": "line",
+      "title": "Attendance Trend (Last 30 Days)",
+      "w": 4,
+      "h": 6,
+      "query": "SELECT DATE(date) as date, COUNT(*) as count FROM attendance WHERE date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY DATE(date) ORDER BY date",
+      "viz_config": {
+        "x": "date",
+        "y": "count",
+        "color": "#3b82f6"
+      }
+    },
+    {
+      "id": "subheader-1",
+      "type": "subheader",
+      "title": "Breakdowns",
+      "w": 4,
+      "h": 1
+    },
+    {
+      "id": "donut-1",
+      "type": "donut",
+      "title": "Attendance by Status",
+      "w": 2,
+      "h": 5,
+      "query": "SELECT status, COUNT(*) as count FROM attendance GROUP BY status",
+      "viz_config": {
+        "label": "status",
+        "value": "count"
+      }
+    },
+    {
+      "id": "bar-1",
+      "type": "bar",
+      "title": "Top Branches by Persons",
+      "w": 2,
+      "h": 5,
+      "query": "SELECT b.name, COUNT(p.id) as count FROM branches b LEFT JOIN persons p ON p.branch_id = b.id GROUP BY b.id, b.name ORDER BY count DESC LIMIT 10",
+      "viz_config": {
+        "color": "#10b981"
+      }
+    },
+    {
+      "id": "divider-2",
+      "type": "divider",
+      "title": "",
+      "w": 4,
+      "h": 1
+    },
+    {
+      "id": "header-2",
+      "type": "header",
+      "title": "Details",
+      "w": 4,
+      "h": 1
+    },
+    {
+      "id": "table-1",
+      "type": "table",
+      "title": "Recent Persons",
+      "w": 4,
+      "h": 6,
+      "query": "SELECT id, first_name, last_name, email, phone, branch_id, created_at FROM persons ORDER BY created_at DESC LIMIT 20",
+      "viz_config": {
+        "columns": ["id", "first_name", "last_name", "email", "phone", "branch_id", "created_at"]
+      }
+    }
+  ]
+}

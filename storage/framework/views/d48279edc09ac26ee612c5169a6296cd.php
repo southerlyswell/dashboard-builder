@@ -1,3 +1,4 @@
+<?php $codeRev = 7; ?>
 <!DOCTYPE html>
 <html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>">
 <head>
@@ -18,7 +19,7 @@
             <div class="logo-area">
                 <span style="font-size:24px;">&#9660;</span>
                 <div>
-                    <h2 class="logo-title">Dashboard Builder</h2>
+                    <h2 class="logo-title">Dashboard Builder <span style="color:#64748b;font-size:11px;font-weight:400;">[rev <?php echo e($codeRev); ?>]</span></h2>
                     <p class="logo-subtitle">AI-Powered Dashboards</p>
                 </div>
             </div>
