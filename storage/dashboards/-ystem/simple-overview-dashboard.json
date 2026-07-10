@@ -1,26 +1,21 @@
 {
-    "title": "Simple Overview Dashboard",
-    "theme": "dark",
     "cards": [
         {
-            "id": "title-1",
-            "type": "title",
-            "title": "Simple Overview Dashboard",
-            "w": 4,
             "h": 2,
+            "w": 4,
+            "id": "title-1",
             "col": 0,
-            "row": 0
+            "row": 0,
+            "type": "title",
+            "title": "Simple Overview Dashboard"
         },
         {
-            "id": "kpi-1",
-            "type": "kpi",
-            "title": "Total Persons",
-            "w": 1,
             "h": 3,
-            "query": "SELECT COUNT(*) as value FROM persons",
+            "w": 1,
+            "id": "kpi-1",
             "col": 0,
             "row": 2,
-            "dataError": null,
+            "type": "kpi",
             "_data": {
                 "value": 2776,
                 "label": "value",
@@ -35,18 +30,18 @@
                 ],
                 "card_id": "kpi-1"
             },
-            "colspan": 1
+            "query": "SELECT COUNT(*) as value FROM persons",
+            "title": "Total Persons",
+            "colspan": 1,
+            "dataError": null
         },
         {
-            "id": "kpi-2",
-            "type": "kpi",
-            "title": "Total Attendance Records",
-            "w": 1,
             "h": 3,
-            "query": "SELECT COUNT(*) as value FROM attendance",
+            "w": 1,
+            "id": "kpi-2",
             "col": 1,
             "row": 2,
-            "dataError": null,
+            "type": "kpi",
             "_data": {
                 "value": 152363,
                 "label": "value",
@@ -61,18 +56,18 @@
                 ],
                 "card_id": "kpi-2"
             },
-            "colspan": 1
+            "query": "SELECT COUNT(*) as value FROM attendance",
+            "title": "Total Attendance Records",
+            "colspan": 1,
+            "dataError": null
         },
         {
-            "id": "kpi-3",
-            "type": "kpi",
-            "title": "Avg Attendance per Week",
-            "w": 1,
             "h": 3,
-            "query": "SELECT ROUND(COUNT(*) / GREATEST(CEIL(DATEDIFF(MAX(created_at), MIN(created_at))/7), 1)) as value FROM attendance",
+            "w": 1,
+            "id": "kpi-3",
             "col": 2,
             "row": 2,
-            "dataError": null,
+            "type": "kpi",
             "_data": {
                 "value": "5079",
                 "label": "value",
@@ -87,23 +82,18 @@
                 ],
                 "card_id": "kpi-3"
             },
-            "colspan": 1
+            "query": "SELECT ROUND(COUNT(*) / GREATEST(CEIL(DATEDIFF(MAX(created_at), MIN(created_at))/7), 1)) as value FROM attendance",
+            "title": "Avg Attendance per Week",
+            "colspan": 1,
+            "dataError": null
         },
         {
-            "id": "line-1",
-            "type": "line",
-            "title": "Attendance Over Time",
-            "w": 4,
             "h": 6,
-            "query": "SELECT DATE(created_at) as date, COUNT(*) as count FROM attendance GROUP BY DATE(created_at) ORDER BY date",
-            "viz_config": {
-                "x": "date",
-                "y": "count",
-                "color": "#3b82f6"
-            },
+            "w": 4,
+            "id": "line-1",
             "col": 0,
             "row": 6,
-            "dataError": null,
+            "type": "line",
             "_data": {
                 "labels": [
                     "2025-12-01",
@@ -748,7 +738,17 @@
                     ]
                 ],
                 "card_id": "line-1"
+            },
+            "query": "SELECT DATE(created_at) as date, COUNT(*) as count FROM attendance GROUP BY DATE(created_at) ORDER BY date",
+            "title": "Attendance Over Time",
+            "dataError": null,
+            "viz_config": {
+                "x": "date",
+                "y": "count",
+                "color": "#3b82f6"
             }
         }
-    ]
+    ],
+    "theme": "dark",
+    "title": "Simple Overview Dashboard"
 }
