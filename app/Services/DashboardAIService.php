@@ -11,9 +11,10 @@ class DashboardAIService
     private string $apiKey;
     private string $baseUrl;
     private string $model;
-    private int $maxFunctionTurns = 15;
+    private int $maxFunctionTurns = 20;
     private string $sandboxDir;
     private ?array $pendingDashboard = null;
+    private ?Client $queryClient = null;
 
     public function __construct()
     {
@@ -57,6 +58,7 @@ class DashboardAIService
     public function chat(string $message, array $context = [], ?int $clientId = null): array
     {
         $client = $clientId ? Client::find($clientId) : null;
+        $this->queryClient = $client;
 
         $systemPrompt = $this->buildSystemPrompt($client);
         $messages = $this->buildMessages($systemPrompt, $message, $context);
@@ -418,6 +420,23 @@ Every dashboard needs: title, 3-4 KPIs, 2 dividers, 2 headers, 1 subheader, 1 li
                     ],
                 ],
             ],
+            [
+                'type' => 'function',
+                'function' => [
+                    'name' => 'run_query',
+                    'description' => 'Execute a SELECT query against the client database and return live results. Use this when the user asks data questions like "how many students?", "list all centres", "show me the latest attendance records", "what is the average revenue per course?". Returns columns, rows, and row_count.',
+                    'parameters' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'query' => [
+                                'type' => 'string',
+                                'description' => 'A valid MySQL SELECT query. Use real table and column names from the schema. Keep it simple — one query per call. LIMIT to 50 rows for chat responses.',
+                            ],
+                        ],
+                        'required' => ['query'],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -434,6 +453,7 @@ Every dashboard needs: title, 3-4 KPIs, 2 dividers, 2 headers, 1 subheader, 1 li
             'write_file' => $this->writeFile($args['path'] ?? '', $args['content'] ?? ''),
             'list_files' => $this->listFiles(),
             'render_dashboard' => $this->renderDashboard($args),
+            'run_query' => $this->runQuery($args['query'] ?? ''),
             default => json_encode(['error' => "Unknown function: $name"]),
         };
     }
@@ -528,6 +548,59 @@ Every dashboard needs: title, 3-4 KPIs, 2 dividers, 2 headers, 1 subheader, 1 li
         Log::info('AI rendered dashboard', ['title' => $title, 'card_count' => count($cards)]);
 
         return json_encode(['success' => true, 'dashboard_title' => $title, 'card_count' => count($cards)]);
+    }
+
+    private function runQuery(string $query): string
+    {
+        if (!$this->queryClient) {
+            return json_encode(['error' => 'No client database connected. Select a client first.']);
+        }
+
+        $query = trim($query);
+        if (!preg_match('/^SELECT\s/i', $query)) {
+            return json_encode(['error' => 'Only SELECT queries are allowed.']);
+        }
+
+        $client = $this->queryClient;
+
+        try {
+            config([
+                'database.connections.temp_query' => [
+                    'driver' => 'mysql',
+                    'host' => $client->db_host,
+                    'port' => $client->db_port,
+                    'database' => $client->db_database,
+                    'username' => $client->db_username,
+                    'password' => $client->db_password ? decrypt($client->db_password) : '',
+                ],
+            ]);
+
+            $limitedQuery = $query;
+            if (!preg_match('/LIMIT\s+\d+/i', $limitedQuery)) {
+                $limitedQuery = rtrim($limitedQuery, ';') . ' LIMIT 50';
+            }
+
+            $rows = \Illuminate\Support\Facades\DB::connection('temp_query')->select($limitedQuery);
+            $count = count($rows);
+
+            if ($count === 0) {
+                return json_encode(['row_count' => 0, 'columns' => [], 'rows' => [], 'message' => 'No data found']);
+            }
+
+            $columns = array_keys((array) $rows[0]);
+            $data = array_map(fn($r) => array_values((array) $r), $rows);
+
+            Log::info('AI ran query', ['query' => substr($query, 0, 100), 'rows' => $count]);
+
+            return json_encode([
+                'row_count' => $count,
+                'columns' => $columns,
+                'rows' => $data,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('AI query failed', ['error' => $e->getMessage(), 'query' => substr($query, 0, 100)]);
+            return json_encode(['error' => $e->getMessage()]);
+        }
     }
 
     private function resolvePath(string $path): ?string
