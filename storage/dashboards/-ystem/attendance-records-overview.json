@@ -1,0 +1,315 @@
+{
+    "title": "Attendance Records Overview",
+    "theme": "dark",
+    "cards": [
+        {
+            "id": "title-1",
+            "type": "title",
+            "title": "Attendance Records Overview",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 0
+        },
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "Total Attendance Records",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM attendance",
+            "col": 0,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 152363,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        152363
+                    ]
+                ],
+                "card_id": "kpi-1"
+            }
+        },
+        {
+            "id": "kpi-2",
+            "type": "kpi",
+            "title": "Unique Persons",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(DISTINCT person_id) as value FROM attendance",
+            "col": 1,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 2612,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        2612
+                    ]
+                ],
+                "card_id": "kpi-2"
+            }
+        },
+        {
+            "id": "kpi-3",
+            "type": "kpi",
+            "title": "Active Projects",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(DISTINCT project_id) as value FROM attendance",
+            "col": 2,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 76,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        76
+                    ]
+                ],
+                "card_id": "kpi-3"
+            }
+        },
+        {
+            "id": "kpi-4",
+            "type": "kpi",
+            "title": "Staff Involved",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(DISTINCT staff_id) as value FROM attendance WHERE staff_id IS NOT NULL",
+            "col": 3,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 27,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        27
+                    ]
+                ],
+                "card_id": "kpi-4"
+            }
+        },
+        {
+            "id": "divider-1",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 5
+        },
+        {
+            "id": "header-1",
+            "type": "header",
+            "title": "Trends & Breakdowns",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 6
+        },
+        {
+            "id": "line-1",
+            "type": "line",
+            "title": "Monthly Attendance Trend",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT DATE_FORMAT(attendance_date, '%Y-%m') as month, COUNT(*) as count FROM attendance GROUP BY DATE_FORMAT(attendance_date, '%Y-%m') ORDER BY month",
+            "viz_config": {
+                "x": "month",
+                "y": "count",
+                "color": "#3b82f6"
+            },
+            "col": 0,
+            "row": 7,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "2025-12",
+                    "2026-02",
+                    "2026-03",
+                    "2026-04",
+                    "2026-05",
+                    "2026-06"
+                ],
+                "values": [
+                    1367,
+                    13470,
+                    35117,
+                    39895,
+                    44283,
+                    18231
+                ],
+                "sum": 152363,
+                "row_count": 6,
+                "columns": [
+                    "month",
+                    "count"
+                ],
+                "rows": [
+                    [
+                        "2025-12",
+                        1367
+                    ],
+                    [
+                        "2026-02",
+                        13470
+                    ],
+                    [
+                        "2026-03",
+                        35117
+                    ],
+                    [
+                        "2026-04",
+                        39895
+                    ],
+                    [
+                        "2026-05",
+                        44283
+                    ],
+                    [
+                        "2026-06",
+                        18231
+                    ]
+                ],
+                "card_id": "line-1"
+            }
+        },
+        {
+            "id": "subheader-1",
+            "type": "subheader",
+            "title": "Breakdowns",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 13
+        },
+        {
+            "id": "donut-1",
+            "type": "donut",
+            "title": "Attendance Status",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT status, COUNT(*) as count FROM attendance GROUP BY status",
+            "viz_config": {
+                "label": "status",
+                "value": "count"
+            },
+            "col": 0,
+            "row": 14,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "present",
+                    "absent",
+                    "late",
+                    "excused"
+                ],
+                "values": [
+                    74908,
+                    76340,
+                    543,
+                    572
+                ],
+                "sum": 152363,
+                "row_count": 4,
+                "columns": [
+                    "status",
+                    "count"
+                ],
+                "rows": [
+                    [
+                        "present",
+                        74908
+                    ],
+                    [
+                        "absent",
+                        76340
+                    ],
+                    [
+                        "late",
+                        543
+                    ],
+                    [
+                        "excused",
+                        572
+                    ]
+                ],
+                "card_id": "donut-1"
+            }
+        },
+        {
+            "id": "bar-1",
+            "type": "bar",
+            "title": "Top Projects by Attendance",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT p.name, COUNT(a.id) as count FROM attendance a JOIN projects p ON a.project_id = p.id GROUP BY p.name ORDER BY count DESC LIMIT 10",
+            "viz_config": {
+                "color": "#10b981"
+            },
+            "col": 2,
+            "row": 14,
+            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.name' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: englishf_fms_demo, SQL: SELECT p.name, COUNT(a.id) as count FROM attendance a JOIN projects p ON a.project_id = p.id GROUP BY p.name ORDER BY count DESC LIMIT 10)"
+        },
+        {
+            "id": "divider-2",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 19
+        },
+        {
+            "id": "header-2",
+            "type": "header",
+            "title": "Recent Records",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 20
+        },
+        {
+            "id": "table-1",
+            "type": "table",
+            "title": "Recent Attendance Entries",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT a.attendance_date, a.status, p.first_name, p.last_name, pr.name as project FROM attendance a LEFT JOIN persons p ON a.person_id = p.id LEFT JOIN projects pr ON a.project_id = pr.id ORDER BY a.attendance_date DESC LIMIT 50",
+            "viz_config": {
+                "columns": [
+                    "attendance_date",
+                    "status",
+                    "first_name",
+                    "last_name",
+                    "project"
+                ]
+            },
+            "col": 0,
+            "row": 21,
+            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'pr.name' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: englishf_fms_demo, SQL: SELECT a.attendance_date, a.status, p.first_name, p.last_name, pr.name as project FROM attendance a LEFT JOIN persons p ON a.person_id = p.id LEFT JOIN projects pr ON a.project_id = pr.id ORDER BY a.attendance_date DESC LIMIT 50)"
+        }
+    ]
+}
