@@ -542,32 +542,40 @@ function dashboardBuilder() {
             var idx = cards.findIndex(function(c) { return c.id === this.cardEditModal.id; }.bind(this));
             if (idx < 0) return;
             var card = cards[idx];
-            var newX = card.col || 0, newY = card.row || 0;
+            var startX = card.col || 0, startY = card.row || 0;
+            var newX = startX, newY = startY;
             if (dir === 'up') newY--;
             else if (dir === 'down') newY++;
             else if (dir === 'left') newX--;
             else if (dir === 'right') newX++;
             if (newX < 0 || newY < 0 || newX + card.w > 4) return;
 
-            // Left/right: swap with occupying card
-            if (dir === 'left' || dir === 'right') {
-                var occupying = cards.find(function(c) {
-                    return c.id !== card.id && c.col === newX && c.row === newY;
+            // Check if a cell is occupied by any other card (full bounding box)
+            var isOccupied = function(x, y) {
+                return cards.some(function(c) {
+                    if (c.id === card.id) return false;
+                    var cx = c.col || 0, cy = c.row || 0;
+                    var cw = c.w || c.colspan || 1, ch = c.h || c.rowspan || 1;
+                    return x >= cx && x < cx + cw && y >= cy && y < cy + ch;
                 });
-                if (occupying) {
-                    occupying.col = card.col;
-                    occupying.row = card.row;
-                }
-            }
-            // Down: find next empty row
-            if (dir === 'down') {
-                while (cards.find(function(c) { return c.id !== card.id && c.col === newX && c.row === newY; })) newY++;
-            }
-            // Up: find next empty row
-            if (dir === 'up') {
-                while (newY >= 0 && cards.find(function(c) { return c.id !== card.id && c.col === newX && c.row === newY; })) newY--;
+            };
+
+            // Find next empty position in the movement direction (no swaps)
+            if (dir === 'left') {
+                while (newX > 0 && isOccupied(newX, newY)) newX--;
+                if (isOccupied(newX, newY)) return; // blocked at grid edge
+            } else if (dir === 'right') {
+                while (newX + card.w < 4 && isOccupied(newX, newY)) newX++;
+                if (isOccupied(newX, newY)) return; // blocked at grid edge
+            } else if (dir === 'down') {
+                while (isOccupied(newX, newY)) newY++;
+            } else if (dir === 'up') {
+                while (newY >= 0 && isOccupied(newX, newY)) newY--;
                 if (newY < 0) return; // no empty slot above, don't move
             }
+
+            // Only move if position actually changed
+            if (newX === startX && newY === startY) return;
 
             card.col = newX;
             card.row = newY;
