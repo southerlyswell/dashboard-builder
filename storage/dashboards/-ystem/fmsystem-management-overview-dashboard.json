@@ -1,0 +1,746 @@
+{
+    "title": "FMSystem — Management Overview Dashboard",
+    "theme": "dark",
+    "cards": [
+        {
+            "id": "title-1",
+            "type": "title",
+            "title": "FMSystem — Management Overview Dashboard",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 0
+        },
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "Total Attendance Records",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM attendance",
+            "viz_config": {
+                "align": "center",
+                "color": "#3b82f6"
+            },
+            "col": 1,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 152363,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        152363
+                    ]
+                ],
+                "card_id": "kpi-1"
+            }
+        },
+        {
+            "id": "kpi-2",
+            "type": "kpi",
+            "title": "Unique Persons Tracked",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(DISTINCT person_id) as value FROM attendance",
+            "viz_config": {
+                "align": "center",
+                "color": "#10b981"
+            },
+            "col": 0,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 2612,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        2612
+                    ]
+                ],
+                "card_id": "kpi-2"
+            }
+        },
+        {
+            "id": "kpi-3",
+            "type": "kpi",
+            "title": "Active Projects",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM projects WHERE project_active = 'yes'",
+            "viz_config": {
+                "align": "center",
+                "color": "#f59e0b"
+            },
+            "col": 2,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 84,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        84
+                    ]
+                ],
+                "card_id": "kpi-3"
+            }
+        },
+        {
+            "id": "kpi-4",
+            "type": "kpi",
+            "title": "Active Branches",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM branches WHERE branch_active = 'yes'",
+            "viz_config": {
+                "align": "center",
+                "color": "#ef4444"
+            },
+            "col": 3,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 15,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        15
+                    ]
+                ],
+                "card_id": "kpi-4"
+            }
+        },
+        {
+            "id": "divider-1",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 5
+        },
+        {
+            "id": "header-1",
+            "type": "header",
+            "title": "Attendance & Operations Overview",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 6,
+            "rowspan": 1,
+            "colspan": 4
+        },
+        {
+            "id": "line-1",
+            "type": "line",
+            "title": "Monthly Attendance Trend",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT DATE_FORMAT(attendance_date, '%Y-%m') as date, COUNT(*) as count FROM attendance GROUP BY date ORDER BY date",
+            "viz_config": {
+                "x": "date",
+                "y": "count",
+                "color": "#3b82f6"
+            },
+            "col": 0,
+            "row": 7,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "2025-12",
+                    "2026-02",
+                    "2026-03",
+                    "2026-04",
+                    "2026-05",
+                    "2026-06"
+                ],
+                "values": [
+                    1367,
+                    13470,
+                    35117,
+                    39895,
+                    44283,
+                    18231
+                ],
+                "sum": 152363,
+                "row_count": 6,
+                "columns": [
+                    "date",
+                    "count"
+                ],
+                "rows": [
+                    [
+                        "2025-12",
+                        1367
+                    ],
+                    [
+                        "2026-02",
+                        13470
+                    ],
+                    [
+                        "2026-03",
+                        35117
+                    ],
+                    [
+                        "2026-04",
+                        39895
+                    ],
+                    [
+                        "2026-05",
+                        44283
+                    ],
+                    [
+                        "2026-06",
+                        18231
+                    ]
+                ],
+                "card_id": "line-1"
+            }
+        },
+        {
+            "id": "subheader-1",
+            "type": "subheader",
+            "title": "Breakdowns",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 13
+        },
+        {
+            "id": "bar-1",
+            "type": "bar",
+            "title": "Top Branches by Attendance",
+            "w": 2,
+            "h": 6,
+            "query": "SELECT b.branch_name as label, COUNT(*) as count FROM attendance a JOIN persons p ON a.person_id = p.person_id JOIN branches b ON p.branch_id = b.branch_id GROUP BY b.branch_name ORDER BY count DESC LIMIT 10",
+            "viz_config": {
+                "color": "#10b981"
+            },
+            "col": 0,
+            "row": 14,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "Meadowlands",
+                    "Pimville",
+                    "Zola",
+                    "Tsakane",
+                    "Jabavu",
+                    "Khunadi",
+                    "Kagiso",
+                    "Bothaville",
+                    "Alexander",
+                    "Tembisa Hub"
+                ],
+                "values": [
+                    35473,
+                    21270,
+                    21210,
+                    18979,
+                    13745,
+                    10680,
+                    10555,
+                    10142,
+                    4819,
+                    1462
+                ],
+                "sum": 148335,
+                "row_count": 10,
+                "columns": [
+                    "label",
+                    "count"
+                ],
+                "rows": [
+                    [
+                        "Meadowlands",
+                        35473
+                    ],
+                    [
+                        "Pimville",
+                        21270
+                    ],
+                    [
+                        "Zola",
+                        21210
+                    ],
+                    [
+                        "Tsakane",
+                        18979
+                    ],
+                    [
+                        "Jabavu",
+                        13745
+                    ],
+                    [
+                        "Khunadi",
+                        10680
+                    ],
+                    [
+                        "Kagiso",
+                        10555
+                    ],
+                    [
+                        "Bothaville",
+                        10142
+                    ],
+                    [
+                        "Alexander",
+                        4819
+                    ],
+                    [
+                        "Tembisa Hub",
+                        1462
+                    ]
+                ],
+                "card_id": "bar-1"
+            },
+            "rowspan": 6
+        },
+        {
+            "id": "donut-1",
+            "type": "donut",
+            "title": "Attendance by Project Category",
+            "w": 3,
+            "h": 6,
+            "query": "SELECT pr.project_category as label, COUNT(*) as count FROM attendance a JOIN projects pr ON a.project_id = pr.project_id GROUP BY pr.project_category ORDER BY count DESC LIMIT 8",
+            "viz_config": {
+                "label": "label",
+                "value": "count"
+            },
+            "col": 2,
+            "row": 14,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "Nutrition",
+                    "Academic Support",
+                    "Toy Library",
+                    "Holiday Programme",
+                    "Teenage Girls",
+                    "Computer Skills",
+                    "ECD",
+                    "Boy's Den"
+                ],
+                "values": [
+                    101046,
+                    15396,
+                    8891,
+                    7960,
+                    7175,
+                    4232,
+                    3939,
+                    2405
+                ],
+                "sum": 151044,
+                "row_count": 8,
+                "columns": [
+                    "label",
+                    "count"
+                ],
+                "rows": [
+                    [
+                        "Nutrition",
+                        101046
+                    ],
+                    [
+                        "Academic Support",
+                        15396
+                    ],
+                    [
+                        "Toy Library",
+                        8891
+                    ],
+                    [
+                        "Holiday Programme",
+                        7960
+                    ],
+                    [
+                        "Teenage Girls",
+                        7175
+                    ],
+                    [
+                        "Computer Skills",
+                        4232
+                    ],
+                    [
+                        "ECD",
+                        3939
+                    ],
+                    [
+                        "Boy's Den",
+                        2405
+                    ]
+                ],
+                "card_id": "donut-1"
+            },
+            "colspan": 3,
+            "rowspan": 6
+        },
+        {
+            "id": "divider-2",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 19
+        },
+        {
+            "id": "header-2",
+            "type": "header",
+            "title": "Detailed View",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 20
+        },
+        {
+            "id": "table-1",
+            "type": "table",
+            "title": "Recent Attendance Records",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT a.attendance_date as Date, a.status as Status, CONCAT(p.first_name, ' ', p.last_name) as Person, pr.project_name as Project FROM attendance a JOIN persons p ON a.person_id = p.person_id JOIN projects pr ON a.project_id = pr.project_id ORDER BY a.attendance_date DESC, a.created_at DESC LIMIT 50",
+            "viz_config": {
+                "columns": [
+                    "Date",
+                    "Status",
+                    "Person",
+                    "Project"
+                ]
+            },
+            "col": 0,
+            "row": 21,
+            "dataError": null,
+            "_data": {
+                "row_count": 50,
+                "columns": [
+                    "Date",
+                    "Status",
+                    "Person",
+                    "Project"
+                ],
+                "rows": [
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Nontokozo Dludlu",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "absent",
+                        "Nontokozo Dludlu",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Lesego Baloyi",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Lesego Baloyi",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Keabetswe Nkosi",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Keabetswe Nkosi",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "late",
+                        "Olwethu Zulu",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Olwethu Zulu",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Dineo Shongwe",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Kgomotso Mokoena",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Kgomotso Mokoena",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Omphile Ngubane",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Omphile Ngubane",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Lorato Shilubane",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "excused",
+                        "Lorato Shilubane",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Keabetswe Mdluli",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "excused",
+                        "Keabetswe Mdluli",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Rebaone Ngubane",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Olebogeng Nkuna",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "late",
+                        "Dineo Mokoena",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Dineo Mokoena",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Ziyanda Mathebula",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Sbahle Khumalo",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Sbahle Moyo",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "late",
+                        "Sbahle Moyo",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Siphesihle Shilubane",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "excused",
+                        "Siphesihle Shilubane",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Lesego Nkosi",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Samkelo Mdluli",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Samkelo Mdluli",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Boitumelo Bhengu",
+                        "Academic Support (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "absent",
+                        "Boitumelo Bhengu",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "excused",
+                        "Sphesihle Chauke",
+                        "Nutrition (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Sphesihle Chauke",
+                        "Toy Library (Tembisa)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Zintle Mabaso",
+                        "Nutrition (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Boitumelo Ndoni",
+                        "Computer Skills (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Kwanele Jele",
+                        "Nutrition (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "excused",
+                        "Kwanele Jele",
+                        "Teenage Girls (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "excused",
+                        "Karabo Khumalo",
+                        "Toy Library (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Karabo Khumalo",
+                        "Teenage Girls (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Karabo Khumalo",
+                        "Computer Skills (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Thato Dludlu",
+                        "Teenage Girls (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Thato Buthelezi",
+                        "Nutrition (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Thato Buthelezi",
+                        "Teenage Girls (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "late",
+                        "Amahle Maphanga",
+                        "Toy Library (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Amahle Maphanga",
+                        "Computer Skills (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Keabetswe Baloyi",
+                        "Computer Skills (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Tsholofelo Shilubane",
+                        "Nutrition (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Tsholofelo Shilubane",
+                        "Teenage Girls (Khayelitsha)"
+                    ],
+                    [
+                        "2026-06-24",
+                        "present",
+                        "Tsholofelo Shilubane",
+                        "Computer Skills (Khayelitsha)"
+                    ]
+                ],
+                "card_id": "table-1"
+            }
+        }
+    ]
+}
