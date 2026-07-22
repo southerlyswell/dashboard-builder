@@ -1,0 +1,476 @@
+{
+    "title": "EduTech SA — Enrollment Dashboard",
+    "theme": "dark",
+    "cards": [
+        {
+            "id": "title-1",
+            "type": "title",
+            "title": "EduTech SA — Enrollment Overview",
+            "w": 4,
+            "h": 2,
+            "col": 0,
+            "row": 0
+        },
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "Total Enrollments",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM enrollments",
+            "viz_config": {
+                "align": "center",
+                "color": "#3b82f6"
+            },
+            "col": 0,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 12,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        12
+                    ]
+                ],
+                "card_id": "kpi-1"
+            }
+        },
+        {
+            "id": "kpi-2",
+            "type": "kpi",
+            "title": "Paid Revenue",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COALESCE(SUM(amount_paid), 0) as value FROM enrollments WHERE payment_status = 'Paid'",
+            "viz_config": {
+                "align": "center",
+                "color": "#10b981",
+                "prefix": "R"
+            },
+            "col": 1,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": "39400.00",
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        "39400.00"
+                    ]
+                ],
+                "card_id": "kpi-2"
+            }
+        },
+        {
+            "id": "kpi-3",
+            "type": "kpi",
+            "title": "Active Students",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM students WHERE status = 'Active'",
+            "viz_config": {
+                "align": "center",
+                "color": "#f59e0b"
+            },
+            "col": 2,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 7,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        7
+                    ]
+                ],
+                "card_id": "kpi-3"
+            }
+        },
+        {
+            "id": "kpi-4",
+            "type": "kpi",
+            "title": "Courses Offered",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM courses",
+            "viz_config": {
+                "align": "center",
+                "color": "#8b5cf6"
+            },
+            "col": 3,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 6,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        6
+                    ]
+                ],
+                "card_id": "kpi-4"
+            }
+        },
+        {
+            "id": "divider-1",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 5
+        },
+        {
+            "id": "header-1",
+            "type": "header",
+            "title": "Enrollment Trends",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 6
+        },
+        {
+            "id": "line-1",
+            "type": "line",
+            "title": "Enrollments by Month",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT MONTH(enrollment_date) as month, COUNT(*) as enrollments FROM enrollments GROUP BY MONTH(enrollment_date) ORDER BY month",
+            "viz_config": {
+                "x": "month",
+                "y": "enrollments",
+                "color": "#3b82f6"
+            },
+            "col": 0,
+            "row": 7,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    1,
+                    2,
+                    3,
+                    4
+                ],
+                "values": [
+                    3,
+                    4,
+                    4,
+                    1
+                ],
+                "sum": 12,
+                "row_count": 4,
+                "columns": [
+                    "month",
+                    "enrollments"
+                ],
+                "rows": [
+                    [
+                        1,
+                        3
+                    ],
+                    [
+                        2,
+                        4
+                    ],
+                    [
+                        3,
+                        4
+                    ],
+                    [
+                        4,
+                        1
+                    ]
+                ],
+                "card_id": "line-1"
+            }
+        },
+        {
+            "id": "subheader-1",
+            "type": "subheader",
+            "title": "Breakdowns",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 13
+        },
+        {
+            "id": "donut-1",
+            "type": "donut",
+            "title": "Payment Status",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT payment_status, COUNT(*) as count FROM enrollments GROUP BY payment_status",
+            "viz_config": {
+                "label": "payment_status",
+                "value": "count"
+            },
+            "col": 0,
+            "row": 14,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "Paid",
+                    "Pending",
+                    "Partial"
+                ],
+                "values": [
+                    9,
+                    2,
+                    1
+                ],
+                "sum": 12,
+                "row_count": 3,
+                "columns": [
+                    "payment_status",
+                    "count"
+                ],
+                "rows": [
+                    [
+                        "Paid",
+                        9
+                    ],
+                    [
+                        "Pending",
+                        2
+                    ],
+                    [
+                        "Partial",
+                        1
+                    ]
+                ],
+                "card_id": "donut-1"
+            }
+        },
+        {
+            "id": "bar-1",
+            "type": "bar",
+            "title": "Enrollments by Course",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT c.name, COUNT(e.id) as enrollments FROM courses c LEFT JOIN enrollments e ON c.id = e.course_id GROUP BY c.name ORDER BY enrollments DESC",
+            "viz_config": {
+                "color": "#10b981"
+            },
+            "col": 2,
+            "row": 14,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "Life Sciences",
+                    "Mathematics Core",
+                    "Physical Science",
+                    "English HL",
+                    "Accounting",
+                    "Geography"
+                ],
+                "values": [
+                    3,
+                    2,
+                    2,
+                    2,
+                    2,
+                    1
+                ],
+                "sum": 12,
+                "row_count": 6,
+                "columns": [
+                    "name",
+                    "enrollments"
+                ],
+                "rows": [
+                    [
+                        "Life Sciences",
+                        3
+                    ],
+                    [
+                        "Mathematics Core",
+                        2
+                    ],
+                    [
+                        "Physical Science",
+                        2
+                    ],
+                    [
+                        "English HL",
+                        2
+                    ],
+                    [
+                        "Accounting",
+                        2
+                    ],
+                    [
+                        "Geography",
+                        1
+                    ]
+                ],
+                "card_id": "bar-1"
+            }
+        },
+        {
+            "id": "divider-2",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 19
+        },
+        {
+            "id": "header-2",
+            "type": "header",
+            "title": "Enrollment Details",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 20
+        },
+        {
+            "id": "table-1",
+            "type": "table",
+            "title": "All Enrollments — Student & Course Details",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT e.id, s.name AS student_name, c.name AS course_name, e.enrollment_date, e.amount_paid, e.payment_status FROM enrollments e JOIN students s ON e.student_id = s.id JOIN courses c ON e.course_id = c.id ORDER BY e.enrollment_date DESC LIMIT 50",
+            "viz_config": {
+                "columns": [
+                    "id",
+                    "student_name",
+                    "course_name",
+                    "enrollment_date",
+                    "amount_paid",
+                    "payment_status"
+                ]
+            },
+            "col": 0,
+            "row": 21,
+            "dataError": null,
+            "_data": {
+                "row_count": 12,
+                "columns": [
+                    "id",
+                    "student_name",
+                    "course_name",
+                    "enrollment_date",
+                    "amount_paid",
+                    "payment_status"
+                ],
+                "rows": [
+                    [
+                        12,
+                        "Mandla Mthembu",
+                        "Accounting",
+                        "2025-04-01",
+                        "4900.00",
+                        "Paid"
+                    ],
+                    [
+                        11,
+                        "Lerato Khumalo",
+                        "Life Sciences",
+                        "2025-03-25",
+                        "4100.00",
+                        "Paid"
+                    ],
+                    [
+                        10,
+                        "Nomsa Zulu",
+                        "Geography",
+                        "2025-03-20",
+                        "3600.00",
+                        "Pending"
+                    ],
+                    [
+                        9,
+                        "Kagiso Modise",
+                        "Accounting",
+                        "2025-03-15",
+                        "4900.00",
+                        "Paid"
+                    ],
+                    [
+                        8,
+                        "Zanele Buthelezi",
+                        "Life Sciences",
+                        "2025-03-05",
+                        "4100.00",
+                        "Paid"
+                    ],
+                    [
+                        7,
+                        "Mandla Mthembu",
+                        "English HL",
+                        "2025-02-20",
+                        "3800.00",
+                        "Paid"
+                    ],
+                    [
+                        6,
+                        "Busisiwe Nkosi",
+                        "Physical Science",
+                        "2025-02-15",
+                        "2600.00",
+                        "Partial"
+                    ],
+                    [
+                        5,
+                        "Nomsa Zulu",
+                        "Mathematics Core",
+                        "2025-02-05",
+                        "4500.00",
+                        "Pending"
+                    ],
+                    [
+                        4,
+                        "Thabo Molefe",
+                        "Life Sciences",
+                        "2025-02-01",
+                        "4100.00",
+                        "Paid"
+                    ],
+                    [
+                        3,
+                        "Sipho Dlamini",
+                        "English HL",
+                        "2025-01-25",
+                        "3800.00",
+                        "Paid"
+                    ],
+                    [
+                        1,
+                        "Thabo Molefe",
+                        "Mathematics Core",
+                        "2025-01-20",
+                        "4500.00",
+                        "Paid"
+                    ],
+                    [
+                        2,
+                        "Lerato Khumalo",
+                        "Physical Science",
+                        "2025-01-20",
+                        "5200.00",
+                        "Paid"
+                    ]
+                ],
+                "card_id": "table-1"
+            }
+        }
+    ]
+}
