@@ -157,13 +157,21 @@
                     </template>
                 </div>
                 <div class="modal-section-label">Move</div>
-                <div class="modal-move-grid">
-                    <div></div>
+                <div class="modal-move-row">
+                    <button @click="moveToTop()" class="move-btn-sm" title="Move to top">⏫</button>
                     <button @click="moveCard('up')" class="move-btn" title="Move up">↑</button>
-                    <div></div>
-                    <button @click="moveCard('left')" class="move-btn" title="Move left">←</button>
                     <button @click="moveCard('down')" class="move-btn" title="Move down">↓</button>
+                    <button @click="moveToBottom()" class="move-btn-sm" title="Move to bottom">⏬</button>
+                </div>
+                <div class="modal-move-row" style="margin-top:6px;">
+                    <button @click="moveCard('left')" class="move-btn" title="Move left">←</button>
                     <button @click="moveCard('right')" class="move-btn" title="Move right">→</button>
+                </div>
+                <div class="modal-row-input-row">
+                    <label class="modal-row-label">Row</label>
+                    <input type="number" min="0" max="999" class="modal-row-input"
+                        x-model.number="cardEditModal.row"
+                        @change="moveToRow(cardEditModal.row)">
                 </div>
                 <div class="modal-action-row">
                     <button @click="deleteCard()" class="btn-delete">Delete Card</button>

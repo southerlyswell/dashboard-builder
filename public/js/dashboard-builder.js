@@ -536,52 +536,99 @@ function dashboardBuilder() {
         },
 
         // ===== Card Movement =====
+        // Check if two bounding boxes overlap
+        _rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+            return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+        },
+
+        // Commit a card position change and re-render
+        _commitMove(card) {
+            this.addRevision(this.dashboard);
+            var self = this;
+            this.$nextTick(function() { self.renderGrid(); });
+        },
+
+        // Bump all cards overlapping with a given rect down by `amount` rows
+        _bumpDown(cards, excludeId, bx, bw, fromRow, amount) {
+            var blockers = cards.filter(function(c) {
+                if (c.id === excludeId) return false;
+                var cy = c.row || 0;
+                var ch = c.h || c.rowspan || 1;
+                // Only bump cards that intersect the column range AND start at or below fromRow
+                var cx = c.col || 0;
+                var cw = c.w || c.colspan || 1;
+                return cy + ch > fromRow && cx < bx + bw && cx + cw > bx;
+            });
+            // Sort bottom-up so lower cards are bumped first (no cascade)
+            blockers.sort(function(a, b) { return (b.row || 0) - (a.row || 0); });
+            blockers.forEach(function(c) { c.row = (c.row || 0) + amount; });
+        },
+
         moveCard(dir) {
             if (!this.cardEditModal || !this.dashboard) return;
             var cards = this.dashboard.cards;
             var idx = cards.findIndex(function(c) { return c.id === this.cardEditModal.id; }.bind(this));
             if (idx < 0) return;
             var card = cards[idx];
-            var startX = card.col || 0, startY = card.row || 0;
-            var newX = startX, newY = startY;
-            if (dir === 'up') newY--;
-            else if (dir === 'down') newY++;
-            else if (dir === 'left') newX--;
-            else if (dir === 'right') newX++;
-            if (newX < 0 || newY < 0 || newX + card.w > 4) return;
+            var sx = card.col || 0, sy = card.row || 0;
+            var sw = card.w || card.colspan || 1, sh = card.h || card.rowspan || 1;
+            var nx = sx, ny = sy;
 
-            // Check if a cell is occupied by any other card (full bounding box)
-            var isOccupied = function(x, y) {
-                return cards.some(function(c) {
+            if (dir === 'up') ny--;
+            else if (dir === 'down') ny++;
+            else if (dir === 'left') nx--;
+            else if (dir === 'right') nx++;
+            if (nx < 0 || ny < 0 || nx + sw > 4) return;
+
+            if (dir === 'left' || dir === 'right') {
+                // Horizontal: swap with the adjacent card on the same row
+                var adjacent = cards.find(function(c) {
                     if (c.id === card.id) return false;
                     var cx = c.col || 0, cy = c.row || 0;
-                    var cw = c.w || c.colspan || 1, ch = c.h || c.rowspan || 1;
-                    return x >= cx && x < cx + cw && y >= cy && y < cy + ch;
+                    var cw = c.w || c.colspan || 1;
+                    if (cy !== sy) return false;
+                    if (dir === 'left') return cx + cw === sx;
+                    return cx === sx + sw;
                 });
-            };
-
-            // Find next empty position in the movement direction (no swaps)
-            if (dir === 'left') {
-                while (newX > 0 && isOccupied(newX, newY)) newX--;
-                if (isOccupied(newX, newY)) return; // blocked at grid edge
-            } else if (dir === 'right') {
-                while (newX + card.w < 4 && isOccupied(newX, newY)) newX++;
-                if (isOccupied(newX, newY)) return; // blocked at grid edge
-            } else if (dir === 'down') {
-                while (isOccupied(newX, newY)) newY++;
-            } else if (dir === 'up') {
-                while (newY >= 0 && isOccupied(newX, newY)) newY--;
-                if (newY < 0) return; // no empty slot above, don't move
+                if (!adjacent) return;
+                adjacent.col = sx;
+                adjacent.row = sy;
+                card.col = nx;
+                card.row = ny;
+                this._commitMove(card);
+            } else {
+                // Vertical: bump down obstructing cards, then take position
+                this._bumpDown(cards, card.id, nx, sw, ny, sh);
+                card.col = nx;
+                card.row = ny;
+                this._commitMove(card);
             }
+        },
 
-            // Only move if position actually changed
-            if (newX === startX && newY === startY) return;
+        moveToRow(n) {
+            if (!this.cardEditModal || !this.dashboard) return;
+            var card = this.cardEditModal;
+            var sw = card.w || card.colspan || 1, sh = card.h || card.rowspan || 1;
+            var cards = this.dashboard.cards;
+            // Bump all cards intersecting the target column range at or below row n
+            this._bumpDown(cards, card.id, card.col || 0, sw, n, sh);
+            card.row = n;
+            this._commitMove(card);
+        },
 
-            card.col = newX;
-            card.row = newY;
-            this.addRevision(this.dashboard);
-            var self = this;
-            this.$nextTick(function() { self.renderGrid(); });
+        moveToTop() {
+            this.moveToRow(0);
+        },
+
+        moveToBottom() {
+            if (!this.cardEditModal || !this.dashboard) return;
+            var maxRow = 0;
+            this.dashboard.cards.forEach(function(c) {
+                if (c.id === this.cardEditModal.id) return;
+                var r = (c.row || 0) + (c.h || c.rowspan || 1);
+                if (r > maxRow) maxRow = r;
+            }.bind(this));
+            this.moveToRow(maxRow);
         },
 
         // ===== Card Editing =====
