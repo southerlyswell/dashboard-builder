@@ -1,31 +1,11 @@
 {
-    "title": "EduTech SA – Management Overview",
+    "title": "EduTech SA — Management Overview",
     "theme": "dark",
-    "filters": [
-        {
-            "id": "date-range",
-            "type": "date_range",
-            "label": "Date Range",
-            "column": "enrollments.enrollment_date"
-        },
-        {
-            "id": "course-category",
-            "type": "dropdown",
-            "label": "Course Category",
-            "query": "SELECT DISTINCT category AS value, category AS label FROM courses WHERE category IS NOT NULL"
-        },
-        {
-            "id": "student-gender",
-            "type": "dropdown",
-            "label": "Gender",
-            "query": "SELECT DISTINCT gender AS value, gender AS label FROM students WHERE gender IS NOT NULL"
-        }
-    ],
     "cards": [
         {
             "id": "title-1",
             "type": "title",
-            "title": "EduTech SA – Management Overview",
+            "title": "EduTech SA — Management Overview",
             "w": 4,
             "h": 2,
             "col": 0,
@@ -34,62 +14,26 @@
         {
             "id": "kpi-1",
             "type": "kpi",
-            "title": "Active Students (30d)",
+            "title": "Active Students",
             "w": 1,
             "h": 3,
-            "query": "SELECT COUNT(DISTINCT student_id) AS value FROM enrollments WHERE enrollment_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
+            "query": "SELECT COUNT(*) as value FROM students WHERE active = 1",
             "col": 0,
             "row": 2,
-            "dataError": null,
-            "_data": {
-                "value": 0,
-                "label": "value",
-                "row_count": 1,
-                "columns": [
-                    "value"
-                ],
-                "rows": [
-                    [
-                        0
-                    ]
-                ],
-                "card_id": "kpi-1"
-            }
+            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'active' in 'where clause' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: edutech_sa, SQL: SELECT COUNT(*) as value FROM students WHERE active = 1 LIMIT 1000)"
         },
         {
             "id": "kpi-2",
             "type": "kpi",
-            "title": "Total Revenue (30d)",
+            "title": "Revenue YTD",
             "w": 1,
             "h": 3,
-            "query": "SELECT COALESCE(SUM(amount),0) AS value FROM revenue WHERE date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
+            "query": "SELECT SUM(amount_paid) as value FROM enrollments WHERE payment_status = 'Paid'",
             "col": 1,
-            "row": 2,
-            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'date' in 'where clause' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: edutech_sa, SQL: SELECT COALESCE(SUM(amount),0) AS value FROM revenue WHERE date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) LIMIT 1000)"
-        },
-        {
-            "id": "kpi-3",
-            "type": "kpi",
-            "title": "Active Courses",
-            "w": 1,
-            "h": 3,
-            "query": "SELECT COUNT(*) AS value FROM courses WHERE active = 1",
-            "col": 2,
-            "row": 2,
-            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'active' in 'where clause' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: edutech_sa, SQL: SELECT COUNT(*) AS value FROM courses WHERE active = 1 LIMIT 1000)"
-        },
-        {
-            "id": "kpi-4",
-            "type": "kpi",
-            "title": "Enrollment Rate (30d)",
-            "w": 1,
-            "h": 3,
-            "query": "SELECT ROUND(COUNT(*) / (SELECT COUNT(*) FROM students) * 100, 1) AS value FROM enrollments WHERE enrollment_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)",
-            "col": 3,
             "row": 2,
             "dataError": null,
             "_data": {
-                "value": "0.0",
+                "value": "39400.00",
                 "label": "value",
                 "row_count": 1,
                 "columns": [
@@ -97,7 +41,57 @@
                 ],
                 "rows": [
                     [
-                        "0.0"
+                        "39400.00"
+                    ]
+                ],
+                "card_id": "kpi-2"
+            }
+        },
+        {
+            "id": "kpi-3",
+            "type": "kpi",
+            "title": "Total Enrollments",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM enrollments",
+            "col": 2,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 12,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        12
+                    ]
+                ],
+                "card_id": "kpi-3"
+            }
+        },
+        {
+            "id": "kpi-4",
+            "type": "kpi",
+            "title": "Total Courses",
+            "w": 1,
+            "h": 3,
+            "query": "SELECT COUNT(*) as value FROM courses",
+            "col": 3,
+            "row": 2,
+            "dataError": null,
+            "_data": {
+                "value": 6,
+                "label": "value",
+                "row_count": 1,
+                "columns": [
+                    "value"
+                ],
+                "rows": [
+                    [
+                        6
                     ]
                 ],
                 "card_id": "kpi-4"
@@ -124,44 +118,191 @@
         {
             "id": "line-1",
             "type": "line",
-            "title": "Revenue Trend (Last 12 Weeks)",
+            "title": "Monthly Revenue Trend",
             "w": 4,
             "h": 6,
-            "query": "SELECT DATE_FORMAT(date, '%Y-%u') AS week, SUM(amount) AS total FROM revenue WHERE date >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK) GROUP BY week ORDER BY week",
+            "query": "SELECT month, CAST(amount AS DECIMAL(10,2)) as revenue FROM revenue WHERE year = 2025 ORDER BY FIELD(month, 'January','February','March','April','May','June','July','August','September','October','November','December')",
+            "viz_config": {
+                "x": "month",
+                "y": "revenue",
+                "color": "#3b82f6"
+            },
             "col": 0,
             "row": 8,
-            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'date' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: edutech_sa, SQL: SELECT DATE_FORMAT(date, '%Y-%u') AS week, SUM(amount) AS total FROM revenue WHERE date >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK) GROUP BY week ORDER BY week LIMIT 1000)"
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June"
+                ],
+                "values": [
+                    "45200.00",
+                    "63800.00",
+                    "52100.00",
+                    "78500.00",
+                    "69400.00",
+                    "81200.00"
+                ],
+                "sum": 390200,
+                "row_count": 6,
+                "columns": [
+                    "month",
+                    "revenue"
+                ],
+                "rows": [
+                    [
+                        "January",
+                        "45200.00"
+                    ],
+                    [
+                        "February",
+                        "63800.00"
+                    ],
+                    [
+                        "March",
+                        "52100.00"
+                    ],
+                    [
+                        "April",
+                        "78500.00"
+                    ],
+                    [
+                        "May",
+                        "69400.00"
+                    ],
+                    [
+                        "June",
+                        "81200.00"
+                    ]
+                ],
+                "card_id": "line-1"
+            }
         },
         {
             "id": "subheader-1",
             "type": "subheader",
-            "title": "Breakdown by Category & Gender",
+            "title": "Breakdowns",
             "w": 4,
             "h": 1,
             "col": 0,
             "row": 14
         },
         {
-            "id": "donut-1",
-            "type": "donut",
-            "title": "Enrollments by Course Category",
-            "w": 2,
-            "h": 5,
-            "query": "SELECT c.category AS label, COUNT(e.id) AS value FROM enrollments e JOIN courses c ON e.course_id = c.id GROUP BY c.category ORDER BY value DESC",
-            "col": 0,
-            "row": 15,
-            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'c.category' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: edutech_sa, SQL: SELECT c.category AS label, COUNT(e.id) AS value FROM enrollments e JOIN courses c ON e.course_id = c.id GROUP BY c.category ORDER BY value DESC LIMIT 1000)"
-        },
-        {
             "id": "bar-1",
             "type": "bar",
-            "title": "Enrollments by Gender",
+            "title": "Enrollments by Course",
             "w": 2,
             "h": 5,
-            "query": "SELECT s.gender AS label, COUNT(e.id) AS value FROM enrollments e JOIN students s ON e.student_id = s.id GROUP BY s.gender ORDER BY value DESC",
+            "query": "SELECT c.name, COUNT(e.id) as count FROM courses c LEFT JOIN enrollments e ON c.id = e.course_id GROUP BY c.name ORDER BY count DESC",
+            "viz_config": {
+                "color": "#10b981"
+            },
+            "col": 0,
+            "row": 15,
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "Life Sciences",
+                    "Mathematics Core",
+                    "Physical Science",
+                    "English HL",
+                    "Accounting",
+                    "Geography"
+                ],
+                "values": [
+                    3,
+                    2,
+                    2,
+                    2,
+                    2,
+                    1
+                ],
+                "sum": 12,
+                "row_count": 6,
+                "columns": [
+                    "name",
+                    "count"
+                ],
+                "rows": [
+                    [
+                        "Life Sciences",
+                        3
+                    ],
+                    [
+                        "Mathematics Core",
+                        2
+                    ],
+                    [
+                        "Physical Science",
+                        2
+                    ],
+                    [
+                        "English HL",
+                        2
+                    ],
+                    [
+                        "Accounting",
+                        2
+                    ],
+                    [
+                        "Geography",
+                        1
+                    ]
+                ],
+                "card_id": "bar-1"
+            }
+        },
+        {
+            "id": "donut-1",
+            "type": "donut",
+            "title": "Payment Status Breakdown",
+            "w": 2,
+            "h": 5,
+            "query": "SELECT payment_status, COUNT(*) as count FROM enrollments GROUP BY payment_status",
+            "viz_config": {
+                "label": "payment_status",
+                "value": "count"
+            },
             "col": 2,
             "row": 15,
-            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 's.gender' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: edutech_sa, SQL: SELECT s.gender AS label, COUNT(e.id) AS value FROM enrollments e JOIN students s ON e.student_id = s.id GROUP BY s.gender ORDER BY value DESC LIMIT 1000)"
+            "dataError": null,
+            "_data": {
+                "labels": [
+                    "Paid",
+                    "Pending",
+                    "Partial"
+                ],
+                "values": [
+                    9,
+                    2,
+                    1
+                ],
+                "sum": 12,
+                "row_count": 3,
+                "columns": [
+                    "payment_status",
+                    "count"
+                ],
+                "rows": [
+                    [
+                        "Paid",
+                        9
+                    ],
+                    [
+                        "Pending",
+                        2
+                    ],
+                    [
+                        "Partial",
+                        1
+                    ]
+                ],
+                "card_id": "donut-1"
+            }
         },
         {
             "id": "divider-2",
@@ -175,7 +316,7 @@
         {
             "id": "header-2",
             "type": "header",
-            "title": "Recent Enrollments",
+            "title": "Details",
             "w": 4,
             "h": 2,
             "col": 0,
@@ -184,13 +325,219 @@
         {
             "id": "table-1",
             "type": "table",
-            "title": "Recent 10 Enrollments",
+            "title": "Recent Enrollments",
             "w": 4,
             "h": 6,
-            "query": "SELECT s.name AS Student, c.name AS Course, e.enrollment_date AS Date, e.status AS Status FROM enrollments e JOIN students s ON e.student_id = s.id JOIN courses c ON e.course_id = c.id ORDER BY e.enrollment_date DESC LIMIT 10",
+            "query": "SELECT e.id, s.name AS student, c.name AS course, e.enrollment_date, e.amount_paid, e.payment_status FROM enrollments e JOIN students s ON e.student_id = s.id JOIN courses c ON e.course_id = c.id ORDER BY e.id",
+            "viz_config": {
+                "columns": [
+                    "id",
+                    "student",
+                    "course",
+                    "enrollment_date",
+                    "amount_paid",
+                    "payment_status"
+                ]
+            },
             "col": 0,
             "row": 23,
-            "dataError": "Query error: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'e.status' in 'field list' (Connection: temp_client, Host: 127.0.0.1, Port: 3306, Database: edutech_sa, SQL: SELECT s.name AS Student, c.name AS Course, e.enrollment_date AS Date, e.status AS Status FROM enrollments e JOIN students s ON e.student_id = s.id JOIN courses c ON e.course_id = c.id ORDER BY e.enrollment_date DESC LIMIT 10)"
+            "dataError": null,
+            "_data": {
+                "row_count": 12,
+                "columns": [
+                    "id",
+                    "student",
+                    "course",
+                    "enrollment_date",
+                    "amount_paid",
+                    "payment_status"
+                ],
+                "rows": [
+                    [
+                        1,
+                        "Thabo Molefe",
+                        "Mathematics Core",
+                        "2025-01-20",
+                        "4500.00",
+                        "Paid"
+                    ],
+                    [
+                        2,
+                        "Lerato Khumalo",
+                        "Physical Science",
+                        "2025-01-20",
+                        "5200.00",
+                        "Paid"
+                    ],
+                    [
+                        3,
+                        "Sipho Dlamini",
+                        "English HL",
+                        "2025-01-25",
+                        "3800.00",
+                        "Paid"
+                    ],
+                    [
+                        4,
+                        "Thabo Molefe",
+                        "Life Sciences",
+                        "2025-02-01",
+                        "4100.00",
+                        "Paid"
+                    ],
+                    [
+                        5,
+                        "Nomsa Zulu",
+                        "Mathematics Core",
+                        "2025-02-05",
+                        "4500.00",
+                        "Pending"
+                    ],
+                    [
+                        6,
+                        "Busisiwe Nkosi",
+                        "Physical Science",
+                        "2025-02-15",
+                        "2600.00",
+                        "Partial"
+                    ],
+                    [
+                        7,
+                        "Mandla Mthembu",
+                        "English HL",
+                        "2025-02-20",
+                        "3800.00",
+                        "Paid"
+                    ],
+                    [
+                        8,
+                        "Zanele Buthelezi",
+                        "Life Sciences",
+                        "2025-03-05",
+                        "4100.00",
+                        "Paid"
+                    ],
+                    [
+                        9,
+                        "Kagiso Modise",
+                        "Accounting",
+                        "2025-03-15",
+                        "4900.00",
+                        "Paid"
+                    ],
+                    [
+                        10,
+                        "Nomsa Zulu",
+                        "Geography",
+                        "2025-03-20",
+                        "3600.00",
+                        "Pending"
+                    ],
+                    [
+                        11,
+                        "Lerato Khumalo",
+                        "Life Sciences",
+                        "2025-03-25",
+                        "4100.00",
+                        "Paid"
+                    ],
+                    [
+                        12,
+                        "Mandla Mthembu",
+                        "Accounting",
+                        "2025-04-01",
+                        "4900.00",
+                        "Paid"
+                    ]
+                ],
+                "card_id": "table-1"
+            }
+        },
+        {
+            "id": "divider-3",
+            "type": "divider",
+            "title": null,
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 29
+        },
+        {
+            "id": "header-3",
+            "type": "header",
+            "title": "Course Profitability",
+            "w": 4,
+            "h": 1,
+            "col": 0,
+            "row": 30,
+            "rowspan": 1
+        },
+        {
+            "id": "table-2",
+            "type": "table",
+            "title": "Profitability by Course",
+            "w": 4,
+            "h": 6,
+            "query": "SELECT c.name AS course, c.subject, COUNT(e.id) AS enrollments, CONCAT('R', FORMAT(SUM(e.amount_paid), 0)) AS total_revenue FROM courses c JOIN enrollments e ON c.id = e.course_id GROUP BY c.id, c.name, c.subject ORDER BY SUM(e.amount_paid) DESC",
+            "viz_config": {
+                "columns": [
+                    "course",
+                    "subject",
+                    "enrollments",
+                    "total_revenue"
+                ]
+            },
+            "col": 0,
+            "row": 32,
+            "dataError": null,
+            "_data": {
+                "row_count": 6,
+                "columns": [
+                    "course",
+                    "subject",
+                    "enrollments",
+                    "total_revenue"
+                ],
+                "rows": [
+                    [
+                        "Life Sciences",
+                        "Science",
+                        3,
+                        "R12,300"
+                    ],
+                    [
+                        "Accounting",
+                        "Commerce",
+                        2,
+                        "R9,800"
+                    ],
+                    [
+                        "Mathematics Core",
+                        "Mathematics",
+                        2,
+                        "R9,000"
+                    ],
+                    [
+                        "Physical Science",
+                        "Science",
+                        2,
+                        "R7,800"
+                    ],
+                    [
+                        "English HL",
+                        "Languages",
+                        2,
+                        "R7,600"
+                    ],
+                    [
+                        "Geography",
+                        "Humanities",
+                        1,
+                        "R3,600"
+                    ]
+                ],
+                "card_id": "table-2"
+            }
         }
     ]
 }
