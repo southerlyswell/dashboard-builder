@@ -128,6 +128,7 @@ class DashboardBuilderController extends Controller
                     'is_active' => $c->is_active,
                     'dashboard_count' => $c->dashboards()->count(),
                     'created_at' => $c->created_at?->format('Y-m-d'),
+                    'updated_at' => $c->updated_at?->format('Y-m-d H:i'),
                 ];
             });
             return response()->json($clients);

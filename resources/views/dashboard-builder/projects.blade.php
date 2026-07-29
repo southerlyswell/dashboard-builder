@@ -48,9 +48,10 @@
                 <div class="card-meta">
                     <span>&#9679; <strong x-text="client.dashboard_count"></strong> dashboards</span>
                     <span>&#9679; Added <strong x-text="client.created_at"></strong></span>
+                    <span>&#9679; Updated <strong x-text="client.updated_at"></strong></span>
                 </div>
                 <div class="card-actions">
-                    <a :href="'/dashboard-builder/clients/' + client.id">&#9998; Edit</a>
+                    <a :href="'/dashboard-builder/clients/' + client.id">&#9998; View</a>
                     <a :href="'/dashboard-builder?client=' + client.id">&#10011; New</a>
                     <button class="action-danger" @click="deleteClient(client.id)">&#10007; Archive</button>
                     <a href="#" @click.prevent="sendToClient(client)" class="action-green">&#9993; Send</a>

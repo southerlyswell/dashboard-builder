@@ -86,7 +86,7 @@
             <div class="db-card-title">{{ $dashboard->name }}</div>
             <div class="db-card-meta">
                 <span>&#9679; {{ $dashboard->card_count }} cards</span>
-                <span>&#9679; {{ $dashboard->updated_at?->format('Y-m-d') }}</span>
+                <span>&#9679; {{ $dashboard->updated_at?->format('Y-m-d H:i') }}</span>
                 @if($dashboard->is_published)<span style="color:#4ade80;">&#9679; Embedded</span>@endif
             </div>
             <div class="db-card-actions">
