@@ -1,0 +1,11 @@
+{
+    "title": "Versioned",
+    "cards": [
+        {
+            "id": "x",
+            "type": "kpi",
+            "title": "X",
+            "colspan": 3
+        }
+    ]
+}
