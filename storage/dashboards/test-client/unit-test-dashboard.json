@@ -1,0 +1,12 @@
+{
+    "title": "Unit Test Dashboard",
+    "theme": "dark",
+    "cards": [
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "Test KPI",
+            "colspan": 2
+        }
+    ]
+}
