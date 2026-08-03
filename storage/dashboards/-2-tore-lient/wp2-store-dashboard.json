@@ -1,0 +1,15 @@
+{
+    "title": "WP2 Store Dashboard",
+    "theme": "dark",
+    "cards": [
+        {
+            "id": "kpi-1",
+            "type": "kpi",
+            "title": "KPI One",
+            "w": 1,
+            "h": 3,
+            "col": 0,
+            "row": 0
+        }
+    ]
+}
