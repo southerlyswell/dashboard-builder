@@ -31,6 +31,8 @@ Route::middleware('auth')->prefix('dashboard-builder')->name('dashbuilder.')->gr
     Route::get('/projects', [DashboardBuilderController::class, 'projects'])->name('projects');
     Route::get('/projects/{id}/load', [DashboardBuilderController::class, 'loadProject'])->name('projects.load');
     Route::delete('/projects/{id}', [DashboardBuilderController::class, 'deleteProject'])->name('projects.delete');
+    Route::post('/dashboards/{id}/duplicate', [DashboardBuilderController::class, 'duplicateDashboard'])->name('dashboard.duplicate');
+    Route::patch('/dashboards/{dashboard}', [DashboardBuilderController::class, 'renameDashboard'])->name('dashboard.rename');
 
     // Client management
     Route::post('/clients', [DashboardBuilderController::class, 'storeClient'])->name('clients.store');

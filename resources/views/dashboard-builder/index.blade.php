@@ -191,7 +191,7 @@
 
 </div>
 
-<script src="/js/dashboard-builder.js?v=21"></script>
+<script type="module" src="/js/dashboard-builder.js?v=23"></script>
 <script>window.ACFS_CONFIG = { clientId: '{{ $activeClient?->id }}' };</script>
 </body>
 </html>

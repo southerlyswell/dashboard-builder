@@ -92,6 +92,8 @@
             <div class="db-card-actions">
                 <a href="/dashboard-builder?client={{ $dashboard->client_id }}&project={{ $dashboard->id }}">&#9998; Load &amp; Edit</a>
                 <a href="/embed/{{ $dashboard->public_id }}" target="_blank">&#9679; View</a>
+                <a href="#" onclick="duplicateDashboard(event, {{ $dashboard->id }})" style="cursor:pointer;">&#128427; Duplicate</a>
+                <a href="#" data-name="{{ $dashboard->name }}" onclick="renameDashboard(event, {{ $dashboard->id }}, this)" style="cursor:pointer;">&#128221; Rename</a>
             </div>
         </div>
         @endforeach
@@ -151,6 +153,53 @@
 </div>
 
 <script>
+async function duplicateDashboard(e, id) {
+    e.preventDefault();
+    const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    try {
+        const r = await fetch('/dashboard-builder/dashboards/' + id + '/duplicate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
+        });
+        if (r.ok) {
+            const data = await r.json();
+            alert('Duplicated! New dashboard: ' + data.name);
+            location.reload();
+        } else {
+            alert('Duplicate failed: ' + (await r.text()).substring(0, 200));
+        }
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function renameDashboard(e, id, el) {
+    e.preventDefault();
+    const currentName = el?.dataset?.name || '';
+    const newName = prompt('Enter a new name for this dashboard:', currentName);
+    if (newName === null) return; // user cancelled
+    const name = newName.trim();
+    if (!name) { alert('Name cannot be empty.'); return; }
+    const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    try {
+        const r = await fetch('/dashboard-builder/dashboards/' + id, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
+            body: JSON.stringify({ name: name })
+        });
+        if (r.ok) {
+            const data = await r.json();
+            alert('Renamed! Dashboard is now: ' + data.name);
+            location.reload();
+        } else {
+            let msg = (await r.text()).substring(0, 300);
+            try {
+                const err = JSON.parse(msg);
+                msg = (err.errors && err.errors.name) ? err.errors.name.join(', ') : (err.message || msg);
+            } catch (_) {}
+            alert('Rename failed: ' + msg);
+        }
+    } catch (err) { alert('Error: ' + err.message); }
+}
+
 async function saveClientEdit(e, id) {
     e.preventDefault();
     const form = document.getElementById('edit-client-form');

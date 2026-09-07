@@ -1,4 +1,6 @@
 
+import { parseDashboard } from './parse-dashboard.js';
+
 function dashboardBuilder() {
     return {
         // ===== State =====
@@ -158,57 +160,23 @@ function dashboardBuilder() {
 
         // ===== Dashboard JSON Parsing =====
         tryParseDashboard(content) {
-            var jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-            var jsonStr = jsonMatch ? jsonMatch[1] : null;
+            // Delegates JSON extraction/normalization to the pure, unit-tested
+            // parse-dashboard module (see tests/js/parse-dashboard.test.js).
+            var json = parseDashboard(content);
+            if (!json) return;
 
-            if (!jsonStr) {
-                var brace = content.indexOf('{"dashboard"');
-                if (brace < 0) brace = content.indexOf('{"theme"');
-                if (brace < 0) brace = content.indexOf('{"cards"');
-                if (brace < 0) brace = content.indexOf('{"title"');
-                if (brace >= 0) {
-                    var depth = 0, end = brace;
-                    for (var i = brace; i < content.length; i++) {
-                        if (content[i] === '{') depth++;
-                        if (content[i] === '}') { depth--; if (depth === 0) { end = i + 1; break; } }
-                    }
-                    jsonStr = content.substring(brace, end);
-                }
+            var self = this;
+            // Auto-place cards that don't have explicit col/row positions
+            if (!json.cards.length || json.cards[0].col === undefined) {
+                self.autoPlaceCards(json.cards);
             }
-            if (!jsonStr) return;
 
-            try {
-                var json = JSON.parse(jsonStr);
-                if (json.dashboard) json = json.dashboard;
-                if (!json.cards || !json.cards.length) return;
-
-                var self = this;
-                json.cards = json.cards.map(function(c, i) {
-                    if (!c.id) c.id = 'card-' + i;
-                    if (!c.w) c.w = c.width || c.colspan || c.colSpan || 3;
-                    if (!c.h) c.h = c.height || c.rowspan || c.rowSpan || (c.type === 'divider' ? 1 : c.type === 'subheader' ? 1 : c.type === 'header' || c.type === 'title' || c.type === 'section' ? 2 : c.type === 'kpi' || c.type === 'stat' ? 3 : 6);
-                    if (c.type === 'divider') { c.w = 4; c.h = 1; }
-                    if (c.type === 'title') { c.w = 4; c.h = c.h || 2; }
-                    if (c.type === 'header') { c.w = 4; c.h = c.h || 1; }
-                    if (c.type === 'subheader') { c.w = 4; c.h = c.h || 1; }
-                    if (c.type === 'section') { c.w = 4; c.h = c.h || 2; }
-                    return c;
-                });
-                // Auto-place cards that don't have explicit col/row positions
-                if (!json.cards.length || json.cards[0].col === undefined) {
-                    self.autoPlaceCards(json.cards);
-                }
-
-                if (!json.title) json.title = 'Dashboard';
-                if (this.dashboard && this.dashboard.cards && this.dashboard.cards.length > 0) {
-                    this.addRevision(this.dashboard);
-                }
-                this.dashboard = json;
-                this.addRevision(json);
-                this.$nextTick(function() { self.renderGrid(); });
-            } catch (e) {
-                console.log('JSON parse failed:', e.message);
+            if (this.dashboard && this.dashboard.cards && this.dashboard.cards.length > 0) {
+                this.addRevision(this.dashboard);
             }
+            this.dashboard = json;
+            this.addRevision(json);
+            this.$nextTick(function() { self.renderGrid(); });
         },
 
         // ===== Grid Rendering (CSS Grid) =====
@@ -777,3 +745,6 @@ function dashboardBuilder() {
         }
     };
 }
+
+// ES modules have their own scope — expose the Alpine component factory globally.
+window.dashboardBuilder = dashboardBuilder;

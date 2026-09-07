@@ -9,16 +9,25 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Set defaults for existing rows
-        DB::statement('ALTER TABLE clients MODIFY db_database VARCHAR(255) DEFAULT NULL');
-        DB::statement('ALTER TABLE clients MODIFY db_username VARCHAR(255) DEFAULT NULL');
-        DB::statement('ALTER TABLE clients MODIFY db_password TEXT DEFAULT NULL');
+        $driver = DB::connection()->getDriverName();
+
+        // MySQL-specific ALTER syntax (production DB)
+        if ($driver === 'mysql') {
+            DB::statement('ALTER TABLE clients MODIFY db_database VARCHAR(255) DEFAULT NULL');
+            DB::statement('ALTER TABLE clients MODIFY db_username VARCHAR(255) DEFAULT NULL');
+            DB::statement('ALTER TABLE clients MODIFY db_password TEXT DEFAULT NULL');
+        }
+        // SQLite (tests) / other drivers: schema builder handles columns; no-op.
     }
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE clients MODIFY db_database VARCHAR(255) NOT NULL');
-        DB::statement('ALTER TABLE clients MODIFY db_username VARCHAR(255) NOT NULL');
-        DB::statement('ALTER TABLE clients MODIFY db_password TEXT NOT NULL');
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'mysql') {
+            DB::statement('ALTER TABLE clients MODIFY db_database VARCHAR(255) NOT NULL');
+            DB::statement('ALTER TABLE clients MODIFY db_username VARCHAR(255) NOT NULL');
+            DB::statement('ALTER TABLE clients MODIFY db_password TEXT NOT NULL');
+        }
     }
 };

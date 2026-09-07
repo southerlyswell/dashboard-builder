@@ -7,8 +7,10 @@ use App\Models\Dashboard;
 use App\Services\DashboardAIService;
 use App\Services\DashboardGitService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardBuilderController extends Controller
 {
@@ -456,6 +458,80 @@ class DashboardBuilderController extends Controller
         $dashboard->delete();
 
         return response()->json(['deleted' => true]);
+    }
+
+    /**
+     * Duplicate a saved dashboard into a new row with a copy of its layout.
+     */
+    public function duplicateDashboard($id)
+    {
+        $dashboard = Dashboard::findOrFail($id);
+
+        $copy = Dashboard::create([
+            'client_id' => $dashboard->client_id,
+            'name' => $dashboard->name . ' (Copy)',
+            'layout' => $dashboard->layout,
+            'theme' => $dashboard->theme,
+            'is_published' => false,
+        ]);
+
+        return response()->json([
+            'id' => $copy->id,
+            'name' => $copy->name,
+            'client_id' => $copy->client_id,
+            'duplicated' => true,
+        ]);
+    }
+
+    /**
+     * Rename a saved dashboard — the new name must be unique per client.
+     *
+     * Note: validation errors are returned as JSON (422) explicitly because the
+     * app's exception handler only renders JSON for `api/*` routes; web routes
+     * would otherwise redirect instead of returning structured errors.
+     */
+    public function renameDashboard(Request $request, Dashboard $dashboard)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) use ($dashboard) {
+                    $exists = Dashboard::where('client_id', $dashboard->client_id)
+                        ->where('id', '!=', $dashboard->id)
+                        ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($value))])
+                        ->exists();
+                    if ($exists) {
+                        $fail('A dashboard with this name already exists for this client.');
+                    }
+                },
+            ],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $name = $validator->validated()['name'];
+
+        $layout = is_array($dashboard->layout) ? $dashboard->layout : (json_decode($dashboard->layout, true) ?? []);
+        // Keep the builder header and the next save in sync with the new name.
+        if (is_array($layout)) {
+            $layout['title'] = $name;
+        }
+
+        $dashboard->update([
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'layout' => $layout,
+        ]);
+
+        return response()->json([
+            'id' => $dashboard->id,
+            'name' => $dashboard->name,
+            'updated' => true,
+        ]);
     }
 
     /**
