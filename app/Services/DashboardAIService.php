@@ -16,7 +16,7 @@ class DashboardAIService
 
     public function __construct()
     {
-        $this->apiKey = env('DEEPSEEK_API_KEY') ?: config('deepseek.api_key', 'sk-30e904fa1cbc4ec5aac6f2d8c8e49a73');
+        $this->apiKey = config('deepseek.api_key');
         $this->baseUrl = config('deepseek.base_url', 'https://api.deepseek.com');
         $this->model = config('deepseek.model', 'deepseek-chat');
         $this->sandboxDir = storage_path('ai');
